@@ -1,0 +1,16 @@
+{
+    "name": "LowEndGames.ObjectTags.Runtime",
+    "rootNamespace": "",
+    "references": [
+        "LowEndGames.Utils.Runtime"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

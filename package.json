@@ -1,0 +1,13 @@
+{
+  "name": "com.low-end-games.object-tags",
+  "version": "1.0.0",
+  "displayName": "Object Tags",
+  "description": "",
+  "author": {
+    "name": "Low End Games",
+    "email": "blll.lowe87@gmail.com",
+    "url": "https://github.com/billowper/leg.object-tags"
+  },
+  "type": "library",
+  "hideInEditor": false
+}
