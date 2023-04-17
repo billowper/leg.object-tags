@@ -17,7 +17,7 @@ namespace LowEndGames.ObjectTagSystem
         [SerializeField] private ObjectTagEvent m_tagRemoved;
         [FoldoutGroup("Events")]
         [SerializeField] private UnityEvent m_tagsChanged;
-
+        
         // -------------------------------------------------- public
         
         public ObjectTagEvent TagAdded => m_tagOwner.TagAdded;
@@ -27,6 +27,12 @@ namespace LowEndGames.ObjectTagSystem
         public UnityEvent TagsChanged => m_tagOwner.TagsChanged;
 
         public IEnumerable<ObjectTag> Tags => m_tagOwner.Tags;
+
+        public void ApplyConfig(TagOwnerConfiguration configuration)
+        {
+            m_configuration = configuration;
+            m_tagOwner.ApplyConfig(configuration);
+        }
 
         public bool HasTag(ObjectTag objectTag) => m_tagOwner.HasTag(objectTag);
 

@@ -47,6 +47,18 @@ namespace LowEndGames.ObjectTagSystem
         public IEnumerable<ObjectTag> Tags => m_tags;
         public Transform transform { get; }
 
+        public void ApplyConfig(TagOwnerConfiguration configuration)
+        {
+            m_configuration = configuration;
+            
+            AddTags(configuration.DefaultTags, false);
+
+            if (m_configuration.BlockTagChanges)
+            {
+                m_tagChangesBlocked.RequestService(new CancellationToken());
+            }
+        }
+
         public bool HasTag(ObjectTag objectTag)
         {
             return m_tags.Contains(objectTag);
@@ -221,7 +233,7 @@ namespace LowEndGames.ObjectTagSystem
         // -------------------------------------------------- private
 
         private readonly string m_name;
-        private readonly TagOwnerConfiguration m_configuration;
+        private TagOwnerConfiguration m_configuration;
         private readonly HashSet<ObjectTag> m_tags = new(32);
         private readonly Dictionary<ObjectTagsInteractionRule, float> m_ruleTimers = new(128);
         private readonly List<ITagBehaviour> m_behaviours = new();
