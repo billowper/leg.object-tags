@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using LowEndGames.Utils;
 using UnityEngine;
@@ -140,11 +141,11 @@ namespace LowEndGames.ObjectTagSystem
             return false;
         }
         
-        public void AddTag(ObjectTags enumValue, bool runFilters = true) => AddTag(enumValue.ToAsset(), runFilters);
+        public void AddTag(Enum enumValue, bool runFilters = true) => AddTag(enumValue.ToAsset(), runFilters);
         
-        public void HasTag(ObjectTags enumValue) => HasTag(enumValue.ToAsset());
+        public void HasTag(Enum enumValue) => HasTag(enumValue.ToAsset());
         
-        public bool RemoveTag(ObjectTags enumValue) => RemoveTag(enumValue.ToAsset());
+        public bool RemoveTag(Enum enumValue) => RemoveTag(enumValue.ToAsset());
         
         public void AddBehaviour(BaseTagBehaviourSettings tagBehaviourSettings)
         {

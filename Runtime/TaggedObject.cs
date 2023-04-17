@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.Events;
@@ -29,15 +30,15 @@ namespace LowEndGames.ObjectTagSystem
 
         public bool HasTag(ObjectTag objectTag) => m_tagOwner.HasTag(objectTag);
 
-        public void HasTag(ObjectTags enumValue) => m_tagOwner.HasTag(enumValue);
+        public void HasTag(Enum enumValue) => m_tagOwner.HasTag(enumValue);
 
         public bool AddTag(ObjectTag objectTag, bool runFilters = true) => m_tagOwner.AddTag(objectTag, runFilters);
 
-        public void AddTag(ObjectTags enumValue, bool runFilters = true) => m_tagOwner.AddTag(enumValue, runFilters);
+        public void AddTag(Enum enumValue, bool runFilters = true) => m_tagOwner.AddTag(enumValue, runFilters);
 
         public bool RemoveTag(ObjectTag objectTag) => m_tagOwner.RemoveTag(objectTag);
 
-        public bool RemoveTag(ObjectTags enumValue) => m_tagOwner.RemoveTag(enumValue);
+        public bool RemoveTag(Enum enumValue) => m_tagOwner.RemoveTag(enumValue);
 
         public void AddTags(IEnumerable<ObjectTag> tags, bool runFilters = true) => m_tagOwner.AddTags(tags, runFilters);
 

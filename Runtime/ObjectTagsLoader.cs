@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using UnityEngine;
 
 namespace LowEndGames.ObjectTagSystem
@@ -13,7 +14,7 @@ namespace LowEndGames.ObjectTagSystem
             s_tags = Resources.LoadAll<ObjectTag>("").ToArray();
         }
 
-        public static ObjectTag ToAsset(this ObjectTags tagsEnum)
+        public static ObjectTag ToAsset(this Enum tagsEnum)
         {
             return s_tags.First(t => t.name.Split('.').Last() == tagsEnum.ToString());
         }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -12,11 +13,11 @@ namespace LowEndGames.ObjectTagSystem
         IEnumerable<ObjectTag> Tags { get; }
         Transform transform { get; }
         bool HasTag(ObjectTag objectTag);
-        void HasTag(ObjectTags enumValue);
+        void HasTag(Enum enumValue);
         bool AddTag(ObjectTag objectTag, bool runFilters = true);
-        void AddTag(ObjectTags enumValue, bool runFilters = true);
+        void AddTag(Enum enumValue, bool runFilters = true);
         bool RemoveTag(ObjectTag objectTag);
-        bool RemoveTag(ObjectTags enumValue);
+        bool RemoveTag(Enum enumValue);
         void AddTags(IEnumerable<ObjectTag> tags, bool runFilters = true);
         void RemoveTags(IEnumerable<ObjectTag> tags);
         bool HasAny(IEnumerable<ObjectTag> tags);
