@@ -13,7 +13,7 @@ namespace LowEndGames.ObjectTagSystem
         IEnumerable<ObjectTag> Tags { get; }
         Transform transform { get; }
         bool HasTag(ObjectTag objectTag);
-        void HasTag(Enum enumValue);
+        bool HasTag(Enum enumValue);
         bool AddTag(ObjectTag objectTag, bool runFilters = true);
         void AddTag(Enum enumValue, bool runFilters = true);
         bool RemoveTag(ObjectTag objectTag);

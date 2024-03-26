@@ -155,7 +155,7 @@ namespace LowEndGames.ObjectTagSystem
         
         public void AddTag(Enum enumValue, bool runFilters = true) => AddTag(enumValue.ToAsset(), runFilters);
         
-        public void HasTag(Enum enumValue) => HasTag(enumValue.ToAsset());
+        public bool HasTag(Enum enumValue) => HasTag(enumValue.ToAsset());
         
         public bool RemoveTag(Enum enumValue) => RemoveTag(enumValue.ToAsset());
         

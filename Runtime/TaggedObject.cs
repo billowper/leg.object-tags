@@ -49,7 +49,7 @@ namespace LowEndGames.ObjectTagSystem
 
         public bool HasTag(ObjectTag objectTag) => m_tagOwner.HasTag(objectTag);
 
-        public void HasTag(Enum enumValue) => m_tagOwner.HasTag(enumValue);
+        public bool HasTag(Enum enumValue) => m_tagOwner.HasTag(enumValue);
 
         public bool AddTag(ObjectTag objectTag, bool runFilters = true) => m_tagOwner.AddTag(objectTag, runFilters);
 
