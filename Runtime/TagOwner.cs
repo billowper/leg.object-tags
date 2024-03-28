@@ -132,7 +132,7 @@ namespace LowEndGames.ObjectTagSystem
             }
         }
         
-        public void RemoveTags(IEnumerable<ObjectTag> tags)
+        public void RemoveTags(params ObjectTag[] tags)
         {
             foreach (var objectTag in tags)
             {
@@ -140,7 +140,7 @@ namespace LowEndGames.ObjectTagSystem
             }
         }
 
-        public bool HasAny(IEnumerable<ObjectTag> tags)
+        public bool HasAny(params ObjectTag[] tags)
         {
             foreach (var objectTag in tags)
             {
@@ -151,6 +151,45 @@ namespace LowEndGames.ObjectTagSystem
             }
 
             return false;
+        }
+        
+        public bool HasAll(params ObjectTag[] tags)
+        {
+            foreach (var objectTag in tags)
+            {
+                if (HasTag(objectTag) == false)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+        
+        public bool HasAny(params Enum[] tags)
+        {
+            foreach (var objectTag in tags)
+            {
+                if (HasTag(objectTag))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+        
+        public bool HasAll(params Enum[] tags)
+        {
+            foreach (var objectTag in tags)
+            {
+                if (HasTag(objectTag) == false)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
         
         public void AddTag(Enum enumValue, bool runFilters = true) => AddTag(enumValue.ToAsset(), runFilters);
@@ -175,6 +214,11 @@ namespace LowEndGames.ObjectTagSystem
             }
             
             m_behaviours.Add(tagBehaviourSettings.Create(this));
+        }
+        
+        public void ClearAll()
+        {
+            m_tags.Clear();
         }
 
         public bool BlockChangesWhile(CancellationToken token)
@@ -238,5 +282,6 @@ namespace LowEndGames.ObjectTagSystem
         private readonly Dictionary<ObjectTagsInteractionRule, float> m_ruleTimers = new(128);
         private readonly List<ITagBehaviour> m_behaviours = new();
         private readonly RefCounter m_tagChangesBlocked = new RefCounter();
+
     }
 }
