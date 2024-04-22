@@ -11,7 +11,6 @@ namespace LowEndGames.ObjectTagSystem
         ObjectTagEvent TagRemoved { get; }
         UnityEvent TagsChanged { get; }
         IEnumerable<ObjectTag> Tags { get; }
-        Transform transform { get; }
         
         bool HasTag(ObjectTag objectTag);
         bool HasTag(Enum enumValue);

@@ -1,19 +1,11 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.Assertions;
 
 namespace LowEndGames.ObjectTagSystem
 {
     public class ObjectTagConditionalObjects : MonoBehaviour
     {
-        protected enum Rule
-        {
-            Any,
-            All
-        }
-
-        [SerializeField] private Rule m_rule; 
-        [SerializeField] private ObjectTag[] m_tags = new ObjectTag[] {}; 
+        [SerializeField] private TagsFilter m_filter = new(); 
         [SerializeField] private MonoBehaviour[] m_components = new MonoBehaviour[] {};
         [SerializeField] private GameObject[] m_gameObjects = new GameObject[] {};
         [SerializeField] private ParticleSystem[] m_particleSystems = new  ParticleSystem[] {};
@@ -44,15 +36,15 @@ namespace LowEndGames.ObjectTagSystem
 
         private void UpdateState(bool force = false)
         {
-            var state = m_rule switch
-            {
-                Rule.Any => m_taggedObject.HasAny(m_tags),
-                Rule.All => m_taggedObject.HasAll(m_tags),
-                _ => throw new ArgumentOutOfRangeException()
-            };
+            var state = m_filter.Check(m_taggedObject);
 
             if (state != m_state || force)
             {
+                foreach (var go in m_components)
+                {
+                    go.enabled = state;
+                }
+                
                 foreach (var go in m_gameObjects)
                 {
                     go.SetActive(state);
