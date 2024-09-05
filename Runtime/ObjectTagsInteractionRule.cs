@@ -3,26 +3,31 @@ using System.Linq;
 using LowEndGames.Utils;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace LowEndGames.ObjectTagSystem
 {
     [CreateAssetMenu(menuName = "Low End Games/Object Tags/Rule")]
     public class ObjectTagsInteractionRule : ScriptableObject
     {
-        public enum RuleTypes
+        public enum EvaluationMethods
         {
-            Global,
+            ObjectInteraction,
             Self
         }
 
-        public RuleTypes RuleType;
+        [FormerlySerializedAs("RuleType")]
+        [Tooltip("ObjectInteraction: these rules are evaluated for every interaction between two objects\n" +
+                 "Self: these rules are evaluated constantly by every tagged object")]
+        public EvaluationMethods EvaluationMethod;
         
+        [HideIf(nameof(EvaluationMethod), EvaluationMethods.ObjectInteraction)]
+        public float RequiredTime;
+
         [InfoBox("$Title", InfoMessageType.None)]
         public List<TagsFilter> Filters;
         public List<TagAction> Actions; 
-        [HideIf(nameof(RuleType), RuleTypes.Global)]
-        public float RequiredTime;
-
+        
         public bool Evaluate(TaggedObject target)
         {
             return Filters.EvaluateFilters(target);
@@ -33,13 +38,13 @@ namespace LowEndGames.ObjectTagSystem
         public string GetDescriptionString(string timeString)
         {
             return
-                $"{(Filters.Count > 0 ? $"If{string.Join(" AND ", Filters.Select(t => t.Title))}{(RuleType is RuleTypes.Self ? $" for {timeString} seconds" : "")}\n" : "")}" +
-                $"{string.Join(", ", Actions.Select(t => $"{t.Action} {t.Tag.name.LastAfterDot()}"))} : {(RuleType is RuleTypes.Global ? "TARGET" : "SELF")}";
+                $"{(Filters.Count > 0 ? $"If{string.Join(" AND ", Filters.Select(t => t.Title))}{(EvaluationMethod is EvaluationMethods.Self ? $" for {timeString} seconds" : "")}\n" : "")}" +
+                $"{string.Join(", ", Actions.Select(t => $"{t.Action} {t.Tag.name.LastAfterDot()}"))} : {(EvaluationMethod is EvaluationMethods.ObjectInteraction ? "TARGET" : "SELF")}";
         }
         
         public static ObjectTagsInteractionRule[] All { get; private set; }
-        public static IEnumerable<ObjectTagsInteractionRule> Global => All.Where(r => r.RuleType is RuleTypes.Global);
-        public static IEnumerable<ObjectTagsInteractionRule> Self => All.Where(r => r.RuleType is RuleTypes.Self);
+        public static IEnumerable<ObjectTagsInteractionRule> Global => All.Where(r => r.EvaluationMethod is EvaluationMethods.ObjectInteraction);
+        public static IEnumerable<ObjectTagsInteractionRule> Self => All.Where(r => r.EvaluationMethod is EvaluationMethods.Self);
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Init()

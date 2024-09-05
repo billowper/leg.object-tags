@@ -22,6 +22,6 @@ namespace LowEndGames.ObjectTagSystem
             return Activator.CreateInstance<T>();
         }
 
-        protected ObjectPool<T> m_pool;
+        private ObjectPool<T> m_pool;
     }
 }
