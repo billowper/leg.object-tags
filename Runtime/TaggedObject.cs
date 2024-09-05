@@ -49,7 +49,7 @@ namespace LowEndGames.ObjectTagSystem
 
         public bool HasTag(ObjectTag objectTag) => m_tagOwner.HasTag(objectTag);
 
-        public void HasTag(Enum enumValue) => m_tagOwner.HasTag(enumValue);
+        public bool HasTag(Enum enumValue) => m_tagOwner.HasTag(enumValue);
 
         public bool AddTag(ObjectTag objectTag, bool runFilters = true) => m_tagOwner.AddTag(objectTag, runFilters);
 
@@ -61,13 +61,24 @@ namespace LowEndGames.ObjectTagSystem
 
         public void AddTags(IEnumerable<ObjectTag> tags, bool runFilters = true) => m_tagOwner.AddTags(tags, runFilters);
 
-        public void RemoveTags(IEnumerable<ObjectTag> tags) => m_tagOwner.RemoveTags(tags);
+        public void RemoveTags(params ObjectTag[] tags) => m_tagOwner.RemoveTags(tags);
 
-        public bool HasAny(IEnumerable<ObjectTag> tags) => m_tagOwner.HasAny(tags);
+        public bool HasAny(params ObjectTag[] tags) => m_tagOwner.HasAny(tags);
+        
+        public bool HasAll(params ObjectTag[] tags) => m_tagOwner.HasAll(tags);
+        
+        public bool HasAny(params Enum[] tags) => m_tagOwner.HasAny(tags);
+        
+        public bool HasAll(params Enum[] tags) => m_tagOwner.HasAll(tags);
         
         public void AddBehaviour(BaseTagBehaviourSettings tagBehaviourSettings) => m_tagOwner.AddBehaviour(tagBehaviourSettings);
         
         public void RemoveBehaviour(BaseTagBehaviourSettings tagBehaviourSettings) => m_tagOwner.RemoveBehaviour(tagBehaviourSettings);
+        
+        public void ClearTags()
+        {
+            m_tagOwner.ClearAll();
+        }
 
         // -------------------------------------------------- private
         

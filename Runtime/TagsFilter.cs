@@ -9,7 +9,7 @@ namespace LowEndGames.ObjectTagSystem
     [Serializable]
     public class TagsFilter
     {
-        public string Title => $"{(Invert ? " NOT" : "")} {string.Join($" {(Comparison is TagComparison.All ? "AND" : "OR")} ", Tags.Select(t => t.name.LastAfterDot()))}";
+        public string Title => $"{(Invert ? " NOT" : "")} {string.Join($" {(Comparison is TagComparison.All ? "AND" : "OR")} ", Tags.Where(t => t != null).Select(t => t.name.LastAfterDot()))}";
 
         [InfoBox("$Title", InfoMessageType.None)]
         public List<ObjectTag> Tags = new();

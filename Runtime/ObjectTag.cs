@@ -1,4 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Sirenix.OdinInspector;
 using UnityEngine;
 
 namespace LowEndGames.ObjectTagSystem
@@ -14,6 +17,14 @@ namespace LowEndGames.ObjectTagSystem
         
         [Tooltip("behaviours which are active when this tag is on an object")]
         public List<BaseTagBehaviourSettings> Behaviours;
+        
+        [ShowInInspector, ReadOnly]
+        public ObjectTags EnumValue { get; private set; }
+
+        private void OnValidate()
+        {
+            EnumValue = Enum.Parse<ObjectTags>(name.Split('.').Last());
+        }
 
         public void DrawGizmos(Transform transform)
         {
