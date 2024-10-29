@@ -1,8 +1,12 @@
 {
-    "name": "LowEndGames.ObjectTags.Runtime",
-    "rootNamespace": "LowEndGames.ObjectTags",
-    "references": [],
-    "includePlatforms": [],
+    "name": "LowEndGames.ObjectTags.Editor",
+    "rootNamespace": "LowEndGames.ObjectTagSystem.EditorTools",
+    "references": [
+        "LowEndGames.ObjectTags.Runtime"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,

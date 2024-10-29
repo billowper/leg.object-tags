@@ -2,16 +2,16 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using LowEndGames.EditorTools;
-using LowEndGames.Utils;
+using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 
 namespace LowEndGames.ObjectTagSystem.EditorTools
 {
-    public class AssertImporter : AssetPostprocessor
+    public class ObjectTagImporter : AssetPostprocessor
     {
+        const string TYPE_NAME = "ObjectTags";
+
         private static void OnPostprocessAllAssets(
             string[] importedAssets,
             string[] deletedAssets,
@@ -24,41 +24,80 @@ namespace LowEndGames.ObjectTagSystem.EditorTools
                 return;
             }
             
-            const string TYPE_NAME = "ObjectTags";
+            var assetNames = GetAllObjectTags().Select(a => a.GetEnumValueName()).ToList();
             
-            if (File.Exists(Path.Combine(Application.dataPath, $"Plugins/{TYPE_NAME}.dll")) == false)
+            string filePath;
+            
+            var enumType = TypeCache.GetTypesDerivedFrom(typeof(Enum)).FirstOrDefault(t => t.Name == TYPE_NAME);
+            if (enumType == null)
             {
-                var generator = new EnumGenerator.Generator(TYPE_NAME, new List<string> {"NULL"}, "LowEndGames.ObjectTagSystem");
+                filePath = $"Assets/Generated/{TYPE_NAME}.cs";
 
-                Debug.Log($"Generating {TYPE_NAME} enum.");
-
-                EnumGenerator.GenerateEnumDll(TYPE_NAME, new List<EnumGenerator.Generator> {generator});
+                Debug.Log($"Couldn't find '{TYPE_NAME}.cs' in project, generating at '{filePath}'.");
+                GenerateEnum(filePath, assetNames);
                 return;
             }
+            
+            var generatedEnumFile = AssetDatabase.FindAssets($"t:TextAsset {TYPE_NAME}");
 
-            var enumType = TypeCache.GetTypesDerivedFrom(typeof(Enum)).FirstOrDefault(t => t.Name == TYPE_NAME);
-            if (enumType != null)
+            filePath = AssetDatabase.GUIDToAssetPath(generatedEnumFile[0]);
+            
+            var enumNames = Enum.GetNames(enumType);
+            if (assetNames.Count != enumNames.Length || assetNames.All(a => enumNames.Contains(a)) == false)
             {
-                var assets = AssetStorage.GetAssets(typeof(ObjectTag));
-                var enumNames = Enum.GetNames(enumType);
-                if (assets.Count != enumNames.Length || assets.All(a => enumNames.Contains(GetEnumValueName(a.name))) == false)
+                if (EditorUtility.DisplayDialog("ObjectTags Enum is out of date!", "Do you want to run code-generation now?", "Yes", "No"))
                 {
-                    Debug.Log($"Found {assets.Count} Object Tag assets, generating new Enum type in code.");
+                    Debug.Log($"Re-generating '{filePath}'");
 
-                    if (EditorUtility.DisplayDialog("ObjectTags Enum is out of date!", "Do you want to regenerate the ObjectTags DLL now?", "Yes", "No"))
-                    {
-                        var assetNames = assets.Select(a => GetEnumValueName(a.name)).ToList();
-                        var generator = new EnumGenerator.Generator(TYPE_NAME, assetNames, "LowEndGames.ObjectTagSystem");
-                        
-                        EnumGenerator.GenerateEnumDll(TYPE_NAME, new List<EnumGenerator.Generator> {generator});
-                    }
+                    GenerateEnum(filePath, assetNames);
                 }
+            }
+            else
+            {
+                Debug.Log($"Found generated enum at '{filePath}', contains entries for all {assetNames.Count} ObjectTag assets");
             }
         }
 
-        private static string GetEnumValueName(string assetName)
+        private static List<ObjectTag> GetAllObjectTags()
         {
-            return assetName.WithoutWhitespace().Split('.').Last().StripNonAlphaNumeric();
+            var guids = AssetDatabase.FindAssets($"t:{nameof(ObjectTag)}");
+            return guids.Select(guid => AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guid), typeof(ObjectTag)) as ObjectTag).ToList();
+        }
+
+        private static void GenerateEnum(string projectRelativePath, List<string> values)
+        {
+            // Ensure the directory exists
+            var basePath = Path.Combine(Application.dataPath, "Generated/");
+            if (!Directory.Exists(basePath))
+                Directory.CreateDirectory(basePath);
+
+            // Generate the enum content as a string
+            var enumContent = GenerateEnumContent(values);
+
+            // Write to a .cs file
+            var filePath = $"{basePath}{TYPE_NAME}.cs";
+            File.WriteAllText(filePath, enumContent);
+            
+            AssetDatabase.ImportAsset(projectRelativePath);
+            AssetDatabase.Refresh();
+        }
+
+        private static string GenerateEnumContent(List<string> values)
+        {
+            var settings = ObjectTagsSettings.GetOrCreateSettings();
+
+            var namespaceDeclaration = string.IsNullOrEmpty(settings.GenerationCodeNamespace) ? "" : $"namespace {settings.GenerationCodeNamespace}\n{{\n";
+            var enumDeclaration = $"public enum {TYPE_NAME}\n{{\n";
+            
+            for (int i = 0; i < values.Count; i++)
+            {
+                enumDeclaration += $"    {values[i].Replace(" ", "")} = {i},\n";
+            }
+
+            enumDeclaration += "}\n";
+            var closingBracket = string.IsNullOrEmpty(settings.GenerationCodeNamespace) ? "" : "}";
+
+            return $"{namespaceDeclaration}{enumDeclaration}{closingBracket}";
         }
     }
 }
