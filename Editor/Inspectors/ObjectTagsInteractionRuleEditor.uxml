@@ -1,0 +1,9 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
+    <Style src="project://database/Packages/leg.object-tags/Editor/ObjectTagsUSS.uss?fileID=7433441132597879392&amp;guid=7b41d34a4481d0642a41643d73c70e0a&amp;type=3#ObjectTagsUSS" />
+    <uie:PropertyField binding-path="m_Script" name="Prop_Script" style="opacity: 0.5;" />
+    <ui:Label text="Label" name="DescriptionLabel" enable-rich-text="true" style="border-top-width: 1px; border-right-width: 1px; border-bottom-width: 1px; border-left-width: 1px; border-top-left-radius: 2px; border-top-right-radius: 2px; border-bottom-right-radius: 2px; border-bottom-left-radius: 2px; border-left-color: rgb(77, 77, 77); border-right-color: rgb(77, 77, 77); border-top-color: rgb(77, 77, 77); border-bottom-color: rgb(77, 77, 77); padding-top: 8px; padding-right: 8px; padding-bottom: 8px; padding-left: 8px; margin-top: 4px; margin-right: 4px; margin-bottom: 4px; margin-left: 4px; font-size: 16px; -unity-font-style: bold; background-color: rgb(46, 46, 46);" />
+    <uie:PropertyField binding-path="EvaluationMethod" name="Prop_EvaluationMethod" />
+    <uie:PropertyField binding-path="RequiredTime" name="Prop_RequiredTime" style="display: flex;" />
+    <uie:PropertyField binding-path="Filters" name="Prop_Filters" style="padding-top: 8px;" />
+    <uie:PropertyField binding-path="Actions" name="Prop_Actions" style="padding-top: 8px;" />
+</ui:UXML>

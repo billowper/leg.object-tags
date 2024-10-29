@@ -1,0 +1,10 @@
+.flex-row {
+    flex-direction: row;
+}
+
+.fg-30{
+    flex-grow: .3;
+}
+.fg-100{
+    flex-grow: 1;
+}
