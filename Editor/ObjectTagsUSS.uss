@@ -8,3 +8,9 @@
 .fg-100{
     flex-grow: 1;
 }
+
+.info-box {
+    padding: 8px;
+    margin: 0 4px;
+    font-size: 13px;
+}

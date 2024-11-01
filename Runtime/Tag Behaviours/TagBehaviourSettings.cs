@@ -11,7 +11,7 @@ namespace LowEndGames.ObjectTagSystem
         {
             var instance = m_pool.Get();
             instance.transform.gameObject.SetActive(true);
-            instance.transform.SetParent(owner.transform);
+            instance.transform.SetParent(owner.GameObject.transform);
             instance.transform.localPosition = Vector3.zero;
             instance.transform.localRotation = Quaternion.identity;
             instance.Init(this, owner);

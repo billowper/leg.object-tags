@@ -9,15 +9,15 @@ namespace LowEndGames.ObjectTagSystem
     public class TagOwner : ITagOwner
     {
         // -------------------------------------------------- public
-
-        public TagOwner(TagOwnerConfiguration configuration,
+        
+        public void Init(TagOwnerConfiguration configuration,
             string name,
-            Transform transform,
+            GameObject gameObject,
             ObjectTagEvent tagAdded,
             ObjectTagEvent tagRemoved,
             UnityEvent tagsChanged)
         {
-            this.transform = transform;
+            GameObject = gameObject;
 
             m_name = name;
             m_configuration = configuration;
@@ -39,12 +39,13 @@ namespace LowEndGames.ObjectTagSystem
             }
         }
 
-        public ObjectTagEvent TagAdded { get; }
-        public ObjectTagEvent TagRemoved { get; }
-        public UnityEvent TagsChanged { get; }
+        public ObjectTagEvent TagAdded { get; private set; }
+        public ObjectTagEvent TagRemoved { get; private set; }
+        public UnityEvent TagsChanged { get; private set; }
         
         public IEnumerable<ObjectTag> Tags => m_tags;
-        public Transform transform { get; }
+        
+        public GameObject GameObject { get; private set; }
 
         public void ApplyConfig(TagOwnerConfiguration configuration)
         {
@@ -249,13 +250,13 @@ namespace LowEndGames.ObjectTagSystem
 #if UNITY_EDITOR
         public void OnDrawGizmos()
         {
-            UnityEditor.Handles.Label(transform.position + Vector3.up, new GUIContent(string.Join("\n", m_tags.Select(t => t.name.Split('.').Last()))));
+            UnityEditor.Handles.Label(GameObject.transform.position + Vector3.up, new GUIContent(string.Join("\n", m_tags.Select(t => t.name.Split('.').Last()))));
         }
 #endif
         
         // -------------------------------------------------- private
 
-        private readonly string m_name;
+        private string m_name;
         private TagOwnerConfiguration m_configuration;
         private readonly HashSet<ObjectTag> m_tags = new(32);
         private readonly Dictionary<ObjectTagsInteractionRule, float> m_ruleTimers = new(128);

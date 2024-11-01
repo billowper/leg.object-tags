@@ -26,20 +26,7 @@ namespace LowEndGames.ObjectTagSystem
         public void ApplyConfig(TagOwnerConfiguration configuration)
         {
             m_configuration = configuration;
-
-            if (m_tagOwner == null)
-            {
-                m_tagOwner = new TagOwner(m_configuration,
-                    gameObject.name,
-                    transform,
-                    m_tagAdded,
-                    m_tagRemoved,
-                    m_tagsChanged);
-            }
-            else
-            {
-                m_tagOwner.ApplyConfig(configuration);
-            }
+            m_tagOwner.ApplyConfig(configuration);
         }
 
         public bool HasTag(ObjectTag objectTag) => m_tagOwner.HasTag(objectTag);
@@ -77,19 +64,16 @@ namespace LowEndGames.ObjectTagSystem
 
         // -------------------------------------------------- private
         
-        private TagOwner m_tagOwner;
+        private readonly TagOwner m_tagOwner = new TagOwner();
 
         private void Awake()
         {
-            if (m_tagOwner == null)
-            {
-                m_tagOwner = new TagOwner(m_configuration,
+            m_tagOwner.Init(m_configuration,
                     gameObject.name,
-                    transform,
+                    gameObject,
                     m_tagAdded,
                     m_tagRemoved,
                     m_tagsChanged);
-            }
         }
 
         private void Update()
