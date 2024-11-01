@@ -6,6 +6,7 @@ namespace LowEndGames.ObjectTagSystem.EditorTools
 {
     public class ObjectTagsSettings : ScriptableObject
     {
+        public string GenerationFolder = "Scripts/Generated/";
         public string GenerationCodeNamespace = "ObjectTagsSystem";
         
         public const string AssetPath = "Assets/Editor/ObjectTagsSystemSettings.asset";

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEngine;
 
@@ -11,6 +10,8 @@ namespace LowEndGames.ObjectTagSystem.EditorTools
     public class ObjectTagImporter : AssetPostprocessor
     {
         const string TYPE_NAME = "ObjectTags";
+        
+        private static ObjectTagsSettings settings => ObjectTagsSettings.GetOrCreateSettings();
 
         private static void OnPostprocessAllAssets(
             string[] importedAssets,
@@ -43,7 +44,9 @@ namespace LowEndGames.ObjectTagSystem.EditorTools
             filePath = AssetDatabase.GUIDToAssetPath(generatedEnumFile[0]);
             
             var enumNames = Enum.GetNames(enumType);
-            if (assetNames.Count != enumNames.Length || assetNames.All(a => enumNames.Contains(a)) == false)
+            if (enumType == null ||
+                (assetNames.Count != enumNames.Length) ||
+                (assetNames.All(a => enumNames.Contains(a)) == false))
             {
                 if (EditorUtility.DisplayDialog("ObjectTags Enum is out of date!", "Do you want to run code-generation now?", "Yes", "No"))
                 {
@@ -67,7 +70,7 @@ namespace LowEndGames.ObjectTagSystem.EditorTools
         private static void GenerateEnum(string projectRelativePath, List<string> values)
         {
             // Ensure the directory exists
-            var basePath = Path.Combine(Application.dataPath, "Generated/");
+            var basePath = Path.Combine(Application.dataPath, settings.GenerationFolder);
             if (!Directory.Exists(basePath))
                 Directory.CreateDirectory(basePath);
 
@@ -84,8 +87,6 @@ namespace LowEndGames.ObjectTagSystem.EditorTools
 
         private static string GenerateEnumContent(List<string> values)
         {
-            var settings = ObjectTagsSettings.GetOrCreateSettings();
-
             var namespaceDeclaration = string.IsNullOrEmpty(settings.GenerationCodeNamespace) ? "" : $"namespace {settings.GenerationCodeNamespace}\n{{\n";
             var enumDeclaration = $"public enum {TYPE_NAME}\n{{\n";
             
