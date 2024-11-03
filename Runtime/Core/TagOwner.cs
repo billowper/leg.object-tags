@@ -10,6 +10,9 @@ namespace LowEndGames.ObjectTagSystem
     {
         // -------------------------------------------------- public
         
+        /// <summary>
+        /// Initializes the TagOwner with a configuration, name, GameObject, and events for tag changes.
+        /// </summary>
         public void Init(TagOwnerConfiguration configuration,
             string name,
             GameObject gameObject,
@@ -18,7 +21,6 @@ namespace LowEndGames.ObjectTagSystem
             UnityEvent tagsChanged)
         {
             GameObject = gameObject;
-
             m_name = name;
             m_configuration = configuration;
             
@@ -38,14 +40,25 @@ namespace LowEndGames.ObjectTagSystem
                 m_ruleTimers.Add(rule, 0);
             }
         }
-
-        public ObjectTagEvent TagAdded { get; private set; }
-        public ObjectTagEvent TagRemoved { get; private set; }
-        public UnityEvent TagsChanged { get; private set; }
-        
-        public IEnumerable<ObjectTag> Tags => m_tags;
         
         public GameObject GameObject { get; private set; }
+
+        public IEnumerable<ObjectTag> Tags => m_tags;
+        
+        /// <summary>
+        /// Event triggered when a new tag is successfully added to the TagOwner.
+        /// </summary>
+        public ObjectTagEvent TagAdded { get; private set; }
+
+        /// <summary>
+        /// Event triggered when a tag is successfully removed from the TagOwner.
+        /// </summary>
+        public ObjectTagEvent TagRemoved { get; private set; }
+
+        /// <summary>
+        /// Event triggered whenever the set of tags on the TagOwner changes.
+        /// </summary>
+        public UnityEvent TagsChanged { get; private set; }
 
         public void ApplyConfig(TagOwnerConfiguration configuration)
         {
@@ -59,29 +72,22 @@ namespace LowEndGames.ObjectTagSystem
             }
         }
 
-        public bool HasTag(ObjectTag objectTag)
-        {
-            return m_tags.Contains(objectTag);
-        }
+        public bool HasTag(ObjectTag objectTag) => m_tags.Contains(objectTag);
 
+        /// <summary>
+        /// Attempts to add a tag to the TagOwner, applying <see cref="ObjectTag.ActionsOnAdded"/>
+        /// and invoking related events if successful.
+        /// </summary>
         public bool AddTag(ObjectTag objectTag, bool runFilters = true)
         {
-            if (m_tagChangesBlocked.IsRequested)
-            {
-                return false;
-            }
-            
-            if (HasTag(objectTag))
+            if (m_tagChangesBlocked.IsRequested || HasTag(objectTag))
             {
                 return false;
             }
 
-            if (runFilters)
+            if (runFilters && !objectTag.Filters.EvaluateFilters(this))
             {
-                if (objectTag.Filters.EvaluateFilters(this) == false)
-                {
-                    return false;
-                }
+                return false;
             }
 
             objectTag.ActionsOnAdded.ApplyTo(this);
@@ -100,6 +106,10 @@ namespace LowEndGames.ObjectTagSystem
             return true;
         }
         
+        /// <summary>
+        /// Attempts to remove a tag from the TagOwner, applying <see cref="ObjectTag.ActionsOnRemoved"/>
+        /// and invoking related events if successful.
+        /// </summary>
         public bool RemoveTag(ObjectTag objectTag)
         {
             if (m_configuration.BlockTagChanges)
@@ -113,6 +123,8 @@ namespace LowEndGames.ObjectTagSystem
                 {
                     RemoveBehaviour(tagBehaviour);
                 }
+                
+                objectTag.ActionsOnRemoved.ApplyTo(this);
 
                 TagRemoved.Invoke(objectTag);
                 TagsChanged.Invoke();
@@ -140,64 +152,20 @@ namespace LowEndGames.ObjectTagSystem
             }
         }
 
-        public bool HasAny(params ObjectTag[] tags)
-        {
-            foreach (var objectTag in tags)
-            {
-                if (HasTag(objectTag))
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
+        public bool HasAny(params ObjectTag[] tags) => tags.Any(HasTag);
         
-        public bool HasAll(params ObjectTag[] tags)
-        {
-            foreach (var objectTag in tags)
-            {
-                if (HasTag(objectTag) == false)
-                {
-                    return false;
-                }
-            }
+        public bool HasAll(params ObjectTag[] tags) => tags.All(HasTag);
 
-            return true;
-        }
+        public bool HasAny(params Enum[] tags) => tags.Any(tag => HasTag(tag.ToAsset()));
         
-        public bool HasAny(params Enum[] tags)
-        {
-            foreach (var objectTag in tags)
-            {
-                if (HasTag(objectTag))
-                {
-                    return true;
-                }
-            }
+        public bool HasAll(params Enum[] tags) => tags.All(tag => HasTag(tag.ToAsset()));
 
-            return false;
-        }
-        
-        public bool HasAll(params Enum[] tags)
-        {
-            foreach (var objectTag in tags)
-            {
-                if (HasTag(objectTag) == false)
-                {
-                    return false;
-                }
-            }
-
-            return true;
-        }
-        
         public void AddTag(Enum enumValue, bool runFilters = true) => AddTag(enumValue.ToAsset(), runFilters);
         
         public bool HasTag(Enum enumValue) => HasTag(enumValue.ToAsset());
         
         public bool RemoveTag(Enum enumValue) => RemoveTag(enumValue.ToAsset());
-        
+
         public void AddBehaviour(TagBehaviourSettings tagBehaviourSettings)
         {
             m_behaviours.Add(tagBehaviourSettings.Create(this));
@@ -214,16 +182,13 @@ namespace LowEndGames.ObjectTagSystem
             }
         }
         
-        public void ClearAll()
-        {
-            m_tags.Clear();
-        }
+        public void ClearAll() => m_tags.Clear();
 
-        public bool BlockChangesWhile(CancelToken token)
-        {
-            return m_tagChangesBlocked.RequestService(token);
-        }
+        public bool BlockChangesWhile(CancelToken token) => m_tagChangesBlocked.RequestService(token);
 
+        /// <summary>
+        /// Updates rule timers and applies <see cref="ObjectTagsInteractionRule.Actions"/> when conditions are met.
+        /// </summary>
         public void Update()
         {
             foreach (var rule in ObjectTagsInteractionRule.Self)
@@ -248,9 +213,9 @@ namespace LowEndGames.ObjectTagSystem
         }
 
 #if UNITY_EDITOR
-        public void OnDrawGizmos()
+        public void OnDrawGizmos(Transform transform)
         {
-            UnityEditor.Handles.Label(GameObject.transform.position + Vector3.up, new GUIContent(string.Join("\n", m_tags.Select(t => t.name.Split('.').Last()))));
+            UnityEditor.Handles.Label(transform.position + Vector3.up, new GUIContent(string.Join("\n", m_tags.Select(t => t.name.Split('.').Last()))), new GUIStyle("label") { wordWrap = false, richText = true, stretchWidth = true});
         }
 #endif
         
@@ -262,6 +227,5 @@ namespace LowEndGames.ObjectTagSystem
         private readonly Dictionary<ObjectTagsInteractionRule, float> m_ruleTimers = new(128);
         private readonly List<ITagBehaviour> m_behaviours = new();
         private readonly TokenCounter m_tagChangesBlocked = new TokenCounter();
-
     }
 }

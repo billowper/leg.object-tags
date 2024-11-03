@@ -14,6 +14,9 @@ namespace LowEndGames.ObjectTagSystem
         [Tooltip("tag actions performed on the owner when this tag is added")]
         public List<TagAction> ActionsOnAdded = new(); 
         
+        [Tooltip("tag actions performed on the owner when this tag is removed")]
+        public List<TagAction> ActionsOnRemoved = new(); 
+        
         [Tooltip("behaviours which are active when this tag is on an object")]
         public List<TagBehaviourSettings> Behaviours = new();
 

@@ -40,7 +40,7 @@ namespace LowEndGames.ObjectTagSystem
 
                 if (m_tweenTime >= Time)
                 {
-                    Value = TargetValue;
+                    Value = m_endValue;
                     IsAnimating = false;
                 }
             }

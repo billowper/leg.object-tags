@@ -86,7 +86,7 @@ namespace LowEndGames.ObjectTagSystem
         {
             if (m_tagOwner != null)
             {
-                m_tagOwner.OnDrawGizmos();
+                m_tagOwner.OnDrawGizmos(transform);
             }
         }
 #endif

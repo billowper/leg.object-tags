@@ -1,16 +1,14 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace LowEndGames.ObjectTagSystem
 {
     public static class ObjectTagsUtils
     {
-        public static bool EvaluateFilters(this IEnumerable<TagsFilter> filters, ITagOwner tagsComponent)
+        public static bool EvaluateFilters(this IEnumerable<TagsFilter> filters, ITagOwner tagOwner)
         {
             foreach (var f in filters)
             {
-                if (f.Check(tagsComponent) == false)
+                if (f.Check(tagOwner) == false)
                 {
                     return false;
                 }
@@ -19,11 +17,11 @@ namespace LowEndGames.ObjectTagSystem
             return true;
         }
 
-        public static void ApplyTo(this IEnumerable<TagAction> tagActions, ITagOwner tagsComponent)
+        public static void ApplyTo(this IEnumerable<TagAction> tagActions, ITagOwner tagOwner)
         {
             foreach (var tagAction in tagActions)
             {
-                tagAction.Apply(tagsComponent);
+                tagAction.Apply(tagOwner);
             }
         }
     }

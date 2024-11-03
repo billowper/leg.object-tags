@@ -41,8 +41,25 @@ namespace LowEndGames.ObjectTagSystem
 
                 if (Actions.Count(t => t.Tag) > 0)
                 {
-                    actionsStr = $"{string.Join(", ", Actions.Where(t => t.Tag != null).Select(t => $"{t.Action} {t.Tag.name.Split(".").Last()}"))}";
-                    actionsStr += $" to {(EvaluationMethod is EvaluationMethods.OnObjectInteraction ? "TARGET" : "SELF")}";
+                    actionsStr = "";
+
+                    var addActions = Actions.Where(a => a.Action is TagAction.TagActions.Add).ToArray();
+                    var removeActions = Actions.Where(a => a.Action is TagAction.TagActions.Remove).ToArray();
+
+                    if (addActions.Length > 0)
+                    {
+                        actionsStr = $"{string.Join(", ", addActions.Where(t => t.Tag != null).Select(t => $"{t.Action} {t.Tag.name.Split(".").Last()}"))}";
+                        actionsStr += $" to {(EvaluationMethod is EvaluationMethods.OnObjectInteraction ? "TARGET" : "SELF")}";
+
+                        if (removeActions.Length > 0)
+                            actionsStr += "\n";
+                    }
+
+                    if (removeActions.Length > 0)
+                    {
+                        actionsStr += $"{string.Join(", ", removeActions.Where(t => t.Tag != null).Select(t => $"{t.Action} {t.Tag.name.Split(".").Last()}"))}";
+                        actionsStr += $" from {(EvaluationMethod is EvaluationMethods.OnObjectInteraction ? "TARGET" : "SELF")}";
+                    }
                 }
 
                 return $"{conditionStr}\n{actionsStr}";

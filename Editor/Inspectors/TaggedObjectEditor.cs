@@ -17,13 +17,13 @@ namespace LowEndGames.ObjectTagSystem.EditorTools
             
             var taggedObject = (TaggedObject)target;
 
-            if (taggedObject.Tags != null)
+            if (taggedObject.Tags != null && taggedObject.Tags.Any())
                 new Label()
                 {
-                    text = string.Join("Tags:\n", taggedObject.Tags.Select(t => $"{t.name.Split('.').Last()}"))
+                    text = "<b>Tags:</b>\n" + string.Join("\n", taggedObject.Tags.Select(t => $"{t.name.Split('.').Last()}"))
                 }.AddTo(root).AddToClassList("info-box");
 
-            new PropertyField(serializedObject.FindProperty("m_configuration")).AddTo(root);
+            new PropertyField(serializedObject.FindProperty("m_configuration")).AddTo(root).AddToClassList("box");
             new PropertyField(serializedObject.FindProperty("m_tagAdded")).AddTo(root);
             new PropertyField(serializedObject.FindProperty("m_tagRemoved")).AddTo(root);
             new PropertyField(serializedObject.FindProperty("m_tagsChanged")).AddTo(root);

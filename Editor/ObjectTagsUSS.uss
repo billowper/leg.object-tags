@@ -10,7 +10,17 @@
 }
 
 .info-box {
-    padding: 8px;
-    margin: 0 4px;
-    font-size: 13px;
+    padding: 12px;
+    margin: 4px;
+    font-size: 15px;
+    background-color: #222222;
+    border-color: rgba(104, 104, 104, 0.62);
+    border-width: 1px;
+}
+.box {
+    padding: 8px 16px;
+    margin: 8px 4px;
+    background-color: #333;
+    border-color: rgba(104, 104, 104, 0.62);
+    border-width: 1px;
 }
