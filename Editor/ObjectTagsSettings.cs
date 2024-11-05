@@ -7,7 +7,7 @@ namespace LowEndGames.ObjectTagSystem.EditorTools
     public class ObjectTagsSettings : ScriptableObject
     {
         public string GenerationFolder = "Scripts/Generated/";
-        public string GenerationCodeNamespace = "ObjectTagsSystem";
+        public string GenerationCodeNamespace = "LowEndGames.Generated";
         
         public const string AssetPath = "Assets/Editor/ObjectTagsSystemSettings.asset";
         
@@ -35,12 +35,13 @@ namespace LowEndGames.ObjectTagSystem.EditorTools
         [SettingsProvider]
         public static SettingsProvider SettingsProvider()
         {
-            var provider = new SettingsProvider("Project/ObjectTags System", SettingsScope.Project)
+            var provider = new SettingsProvider("Project/LowEndGames/Object Tags", SettingsScope.Project)
             {
                 label = "Object Tags",
                 guiHandler = (_) =>
                 {
                     var settings = GetSerializedSettings();
+                    EditorGUILayout.PropertyField(settings.FindProperty(nameof(GenerationFolder)));
                     EditorGUILayout.PropertyField(settings.FindProperty(nameof(GenerationCodeNamespace)));
                     settings.ApplyModifiedPropertiesWithoutUndo();
                 },

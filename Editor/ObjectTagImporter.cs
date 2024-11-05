@@ -78,7 +78,7 @@ namespace LowEndGames.ObjectTagSystem.EditorTools
             var enumContent = GenerateEnumContent(values);
 
             // Write to a .cs file
-            var filePath = $"{basePath}{TYPE_NAME}.cs";
+            var filePath = $"{basePath}/{TYPE_NAME}.cs";
             File.WriteAllText(filePath, enumContent);
             
             AssetDatabase.ImportAsset(projectRelativePath);
