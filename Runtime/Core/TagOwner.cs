@@ -6,6 +6,9 @@ using UnityEngine.Events;
 
 namespace LowEndGames.ObjectTagSystem
 {
+    /// <summary>
+    /// an object that owns tags.
+    /// </summary>
     public class TagOwner : ITagOwner
     {
         // -------------------------------------------------- public

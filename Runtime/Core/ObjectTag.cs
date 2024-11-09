@@ -5,6 +5,9 @@ using UnityEngine;
 
 namespace LowEndGames.ObjectTagSystem
 {
+    /// <summary>
+    /// defines a Tag, will have a corresponding enum value generated
+    /// </summary>
     [CreateAssetMenu(menuName = "ObjectTags System/Tag")]
     public class ObjectTag : ScriptableObject
     {

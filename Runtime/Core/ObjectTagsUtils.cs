@@ -2,6 +2,9 @@
 
 namespace LowEndGames.ObjectTagSystem
 {
+    /// <summary>
+    /// some extension methods
+    /// </summary>
     public static class ObjectTagsUtils
     {
         public static bool EvaluateFilters(this IEnumerable<TagsFilter> filters, ITagOwner tagOwner)

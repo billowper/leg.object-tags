@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace LowEndGames.ObjectTagSystem
 {
+    /// <summary>
+    /// loads all tags via Resources API 
+    /// </summary>
     public static class ObjectTagsLoader
     {
         private static ObjectTag[] s_tags;

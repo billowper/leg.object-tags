@@ -5,6 +5,9 @@ using LowEndGames.ObjectTagSystem.Attributes;
 
 namespace LowEndGames.ObjectTagSystem
 {
+    /// <summary>
+    /// evaluates whether a <see cref="ITagOwner"/> has/does not have, any/all of the provided <see cref="ObjectTag"/>s
+    /// </summary>
     [Serializable]
     public class TagsFilter
     {
@@ -21,7 +24,7 @@ namespace LowEndGames.ObjectTagSystem
             All
         }
 
-        public bool Check(ITagOwner taggedObject)
+        public bool Check(ITagOwner tagOwner)
         {
             if (Tags.Count == 0)
             {
@@ -30,8 +33,8 @@ namespace LowEndGames.ObjectTagSystem
 
             var result = Comparison switch
             {
-                TagComparison.Any => Tags.Any(taggedObject.HasTag),
-                TagComparison.All => Tags.All(taggedObject.HasTag),
+                TagComparison.Any => Tags.Any(tagOwner.HasTag),
+                TagComparison.All => Tags.All(tagOwner.HasTag),
                 _ => throw new ArgumentOutOfRangeException()
             };
 

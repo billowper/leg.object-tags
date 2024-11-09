@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.Serialization;
 
 namespace LowEndGames.ObjectTagSystem
 {
+    /// <summary>
+    /// evaluates a set of <see cref="TagsFilter"/>s and executes <see cref="TagAction"/> if all pass
+    /// </summary>
     [CreateAssetMenu(menuName = "ObjectTags System/Interaction Rule")]
     public class ObjectTagsInteractionRule : ScriptableObject
     {

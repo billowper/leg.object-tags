@@ -2,6 +2,9 @@
 
 namespace LowEndGames.ObjectTagSystem
 {
+    /// <summary>
+    /// Add/Remove <see cref="ObjectTag"/>s from a <see cref="ITagOwner"/>
+    /// </summary>
     [Serializable]
     public class TagAction
     {
