@@ -1,5 +1,5 @@
 # Object Tags System
-A data-driven, rule based system based on tags. For Unity!
+A data-driven, rule based object tag system for Unity/
 
 * Objects have a set of tags
 * When two TaggedObjects interact, a set of rules is evaluated and tags will be added or removed (if self "Burning" Add "Hot" to other)
