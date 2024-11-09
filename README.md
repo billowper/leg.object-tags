@@ -7,4 +7,4 @@ A data-driven, rule based system based on tags.
 * Various components for conditional objects, material properties, physics settings and so on
 * Filters for triggers etc
 
-  Not really ready for public consumption, but I plan to make sample project soon!
+Not really ready for public consumption, but I plan to make sample project soon!
