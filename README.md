@@ -6,3 +6,5 @@ A data-driven, rule based system based on tags.
 * Rules can also be evaluated continuously (e.g. if self "Wet", remove "Burning")
 * Various components for conditional objects, material properties, physics settings and so on
 * Filters for triggers etc
+
+  Not really ready for public consumption, but I plan to make sample project soon!
