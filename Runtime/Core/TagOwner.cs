@@ -115,7 +115,7 @@ namespace LowEndGames.ObjectTagSystem
         /// </summary>
         public bool RemoveTag(ObjectTag objectTag)
         {
-            if (m_configuration.BlockTagChanges)
+            if (m_tagChangesBlocked.IsRequested)
             {
                 return false;
             }
@@ -184,10 +184,10 @@ namespace LowEndGames.ObjectTagSystem
                 }
             }
         }
-        
+
         public void ClearAll() => m_tags.Clear();
 
-        public bool BlockChangesWhile(CancelToken token) => m_tagChangesBlocked.RequestService(token);
+        public void BlockChangesWhile(CancelToken token) => m_tagChangesBlocked.RequestService(token);
 
         /// <summary>
         /// Updates rule timers and applies <see cref="ObjectTagsInteractionRule.Actions"/> when conditions are met.

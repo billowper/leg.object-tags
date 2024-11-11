@@ -25,5 +25,6 @@ namespace LowEndGames.ObjectTagSystem
         bool HasAll(params Enum[] tags);
         void AddBehaviour(TagBehaviourSettings tagBehaviourSettings);
         void RemoveBehaviour(TagBehaviourSettings tagBehaviourSettings);
+        void BlockChangesWhile(CancelToken cancelToken);
     }
 }

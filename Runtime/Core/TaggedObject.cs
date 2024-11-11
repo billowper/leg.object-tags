@@ -62,6 +62,11 @@ namespace LowEndGames.ObjectTagSystem
             m_tagOwner.ClearAll();
         }
 
+        public void BlockChangesWhile(CancelToken cancelToken)
+        {
+            m_tagOwner.BlockChangesWhile(cancelToken);
+        }
+
         // -------------------------------------------------- private
         
         private readonly TagOwner m_tagOwner = new TagOwner();
