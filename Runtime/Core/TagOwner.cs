@@ -81,9 +81,9 @@ namespace LowEndGames.ObjectTagSystem
         /// Attempts to add a tag to the TagOwner, applying <see cref="ObjectTag.ActionsOnAdded"/>
         /// and invoking related events if successful.
         /// </summary>
-        public bool AddTag(ObjectTag objectTag, bool runFilters = true)
+        public bool AddTag(ObjectTag objectTag, bool runFilters = true, bool force = false)
         {
-            if (m_tagChangesBlocked.IsRequested || HasTag(objectTag))
+            if ((!force && m_tagChangesBlocked.IsRequested) || HasTag(objectTag))
             {
                 return false;
             }
@@ -113,9 +113,9 @@ namespace LowEndGames.ObjectTagSystem
         /// Attempts to remove a tag from the TagOwner, applying <see cref="ObjectTag.ActionsOnRemoved"/>
         /// and invoking related events if successful.
         /// </summary>
-        public bool RemoveTag(ObjectTag objectTag)
+        public bool RemoveTag(ObjectTag objectTag, bool force = false)
         {
-            if (m_tagChangesBlocked.IsRequested)
+            if ((!force && m_tagChangesBlocked.IsRequested))
             {
                 return false;
             }
@@ -139,35 +139,21 @@ namespace LowEndGames.ObjectTagSystem
             return false;
         }
 
-        public void AddTags(IEnumerable<ObjectTag> tags, bool runFilters = true)
+        public void AddTags(IEnumerable<ObjectTag> tags, bool runFilters = true, bool force = false)
         {
             foreach (var objectTag in tags)
             {
-                AddTag(objectTag, runFilters);
+                AddTag(objectTag, runFilters, force);
             }
         }
         
-        public void RemoveTags(params ObjectTag[] tags)
+        public void RemoveTags(IEnumerable<ObjectTag> tags, bool force = false)
         {
             foreach (var objectTag in tags)
             {
-                RemoveTag(objectTag);
+                RemoveTag(objectTag, force);
             }
         }
-
-        public bool HasAny(params ObjectTag[] tags) => tags.Any(HasTag);
-        
-        public bool HasAll(params ObjectTag[] tags) => tags.All(HasTag);
-
-        public bool HasAny(params Enum[] tags) => tags.Any(tag => HasTag(tag.ToAsset()));
-        
-        public bool HasAll(params Enum[] tags) => tags.All(tag => HasTag(tag.ToAsset()));
-
-        public void AddTag(Enum enumValue, bool runFilters = true) => AddTag(enumValue.ToAsset(), runFilters);
-        
-        public bool HasTag(Enum enumValue) => HasTag(enumValue.ToAsset());
-        
-        public bool RemoveTag(Enum enumValue) => RemoveTag(enumValue.ToAsset());
 
         public void AddBehaviour(TagBehaviourSettings tagBehaviourSettings)
         {

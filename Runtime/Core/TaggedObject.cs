@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -31,41 +30,24 @@ namespace LowEndGames.ObjectTagSystem
 
         public bool HasTag(ObjectTag objectTag) => m_tagOwner.HasTag(objectTag);
 
-        public bool HasTag(Enum enumValue) => m_tagOwner.HasTag(enumValue);
+        public bool AddTag(ObjectTag objectTag, bool runFilters = true, bool force = false) => m_tagOwner.AddTag(objectTag, runFilters, force);
 
-        public bool AddTag(ObjectTag objectTag, bool runFilters = true) => m_tagOwner.AddTag(objectTag, runFilters);
+        public bool RemoveTag(ObjectTag objectTag, bool force = false) => m_tagOwner.RemoveTag(objectTag, force);
 
-        public void AddTag(Enum enumValue, bool runFilters = true) => m_tagOwner.AddTag(enumValue, runFilters);
+        public void AddTags(IEnumerable<ObjectTag> tags, bool runFilters = true, bool force = false) => m_tagOwner.AddTags(tags, runFilters, force);
 
-        public bool RemoveTag(ObjectTag objectTag) => m_tagOwner.RemoveTag(objectTag);
+        public void RemoveTags(IEnumerable<ObjectTag> tags, bool force = false) => m_tagOwner.RemoveTags(tags, force);
 
-        public bool RemoveTag(Enum enumValue) => m_tagOwner.RemoveTag(enumValue);
-
-        public void AddTags(IEnumerable<ObjectTag> tags, bool runFilters = true) => m_tagOwner.AddTags(tags, runFilters);
-
-        public void RemoveTags(params ObjectTag[] tags) => m_tagOwner.RemoveTags(tags);
-
-        public bool HasAny(params ObjectTag[] tags) => m_tagOwner.HasAny(tags);
-        
-        public bool HasAll(params ObjectTag[] tags) => m_tagOwner.HasAll(tags);
-        
-        public bool HasAny(params Enum[] tags) => m_tagOwner.HasAny(tags);
-        
-        public bool HasAll(params Enum[] tags) => m_tagOwner.HasAll(tags);
-        
         public void AddBehaviour(TagBehaviourSettings tagBehaviourSettings) => m_tagOwner.AddBehaviour(tagBehaviourSettings);
         
         public void RemoveBehaviour(TagBehaviourSettings tagBehaviourSettings) => m_tagOwner.RemoveBehaviour(tagBehaviourSettings);
         
-        public void ClearTags()
-        {
-            m_tagOwner.ClearAll();
-        }
-
         public void BlockChangesWhile(CancelToken cancelToken)
         {
             m_tagOwner.BlockChangesWhile(cancelToken);
         }
+        
+        public void ClearAll() => m_tagOwner.ClearAll();
 
         // -------------------------------------------------- private
         
