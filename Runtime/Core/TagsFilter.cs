@@ -24,11 +24,17 @@ namespace LowEndGames.ObjectTagSystem
             All
         }
 
+        /// <summary>
+        /// returns true if the filter has no tags, or if the checks pass
+        /// </summary>
+        /// <param name="tagOwner"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
         public bool Check(ITagOwner tagOwner)
         {
             if (Tags.Count == 0)
             {
-                return !Invert;
+                return true;
             }
 
             var result = Comparison switch
