@@ -20,11 +20,11 @@ namespace LowEndGames.ObjectTagSystem
             return true;
         }
 
-        public static void ApplyTo(this IEnumerable<TagAction> tagActions, ITagOwner tagOwner)
+        public static void ApplyTo(this IEnumerable<TagAction> tagActions, ITagOwner tagOwner, bool force)
         {
             foreach (var tagAction in tagActions)
             {
-                tagAction.Apply(tagOwner);
+                tagAction.Apply(tagOwner, force);
             }
         }
     }

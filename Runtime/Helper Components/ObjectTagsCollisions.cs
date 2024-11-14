@@ -12,6 +12,7 @@ namespace LowEndGames.ObjectTagSystem
         [SerializeField] private TaggedObject m_objectTags;
         [SerializeField] private bool m_trigger = true;
         [SerializeField] private bool m_collision = true;
+        [SerializeField] private bool m_force = true;
 
         private readonly List<TaggedObject> m_objectsAffected = new(32);
         private float m_tickTime;
@@ -85,7 +86,7 @@ namespace LowEndGames.ObjectTagSystem
             {
                 if (rule.Filters.EvaluateFilters(m_objectTags))
                 {
-                    rule.Actions.ApplyTo(target);
+                    rule.Actions.ApplyTo(target, m_force);
                 }
             }
         }

@@ -31,16 +31,21 @@ namespace LowEndGames.ObjectTagSystem
             TagRemoved = tagRemoved;
             TagsChanged = tagsChanged;
             
-            AddTags(configuration.DefaultTags, false);
-
-            if (m_configuration.BlockTagChanges)
+            foreach (var tag in ObjectTagsLoader.Tags)
             {
-                m_tagChangesBlocked.RequestService(new CancelToken());
+                m_tagForcedTokenCounters.Add(tag, new TokenCounter());
             }
 
             foreach (var rule in ObjectTagsInteractionRule.All)
             {
                 m_ruleTimers.Add(rule, 0);
+            }
+            
+            AddTags(configuration.DefaultTags, false);
+
+            if (m_configuration.BlockTagChanges)
+            {
+                m_tagChangesBlocked.RequestService(new CancelToken());
             }
         }
         
@@ -93,7 +98,7 @@ namespace LowEndGames.ObjectTagSystem
                 return false;
             }
 
-            objectTag.ActionsOnAdded.ApplyTo(this);
+            objectTag.ActionsOnAdded.ApplyTo(this, force);
 
             foreach (var tagBehaviour in objectTag.Behaviours)
             {
@@ -115,7 +120,12 @@ namespace LowEndGames.ObjectTagSystem
         /// </summary>
         public bool RemoveTag(ObjectTag objectTag, bool force = false)
         {
-            if ((!force && m_tagChangesBlocked.IsRequested))
+            if (!force && m_tagChangesBlocked.IsRequested)
+            {
+                return false;
+            }
+
+            if (m_tagForcedTokenCounters[objectTag].IsRequested)
             {
                 return false;
             }
@@ -127,7 +137,7 @@ namespace LowEndGames.ObjectTagSystem
                     RemoveBehaviour(tagBehaviour);
                 }
                 
-                objectTag.ActionsOnRemoved.ApplyTo(this);
+                objectTag.ActionsOnRemoved.ApplyTo(this, force);
 
                 TagRemoved.Invoke(objectTag);
                 TagsChanged.Invoke();
@@ -174,6 +184,17 @@ namespace LowEndGames.ObjectTagSystem
         public void ClearAll() => m_tags.Clear();
 
         public void BlockChangesWhile(CancelToken token) => m_tagChangesBlocked.RequestService(token);
+        
+        public void ForceTagsWhile(IEnumerable<ObjectTag> tags, CancelToken cancelToken)
+        {
+            foreach (var tag in tags)
+            {
+                if (m_tagForcedTokenCounters[tag].RequestService(cancelToken))
+                {
+                    AddTag(tag);
+                }
+            }
+        }
 
         /// <summary>
         /// Updates rule timers and applies <see cref="ObjectTagsInteractionRule.Actions"/> when conditions are met.
@@ -191,7 +212,7 @@ namespace LowEndGames.ObjectTagSystem
 
                     if (m_ruleTimers[rule] > requiredTime)
                     {
-                        rule.Actions.ApplyTo(this);
+                        rule.Actions.ApplyTo(this, false);
                     }
                 }
                 else
@@ -214,7 +235,9 @@ namespace LowEndGames.ObjectTagSystem
         private TagOwnerConfiguration m_configuration;
         private readonly HashSet<ObjectTag> m_tags = new(32);
         private readonly Dictionary<ObjectTagsInteractionRule, float> m_ruleTimers = new(128);
+        private readonly Dictionary<ObjectTag, TokenCounter> m_tagForcedTokenCounters = new(128);
         private readonly List<ITagBehaviour> m_behaviours = new();
         private readonly TokenCounter m_tagChangesBlocked = new TokenCounter();
+        private CancelToken m_blockTagChangesWhile;
     }
 }

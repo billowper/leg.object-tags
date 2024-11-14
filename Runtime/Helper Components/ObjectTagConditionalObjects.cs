@@ -1,8 +1,11 @@
 ﻿using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.Events;
 
 namespace LowEndGames.ObjectTagSystem
 {
+    
+    
     /// <summary>
     /// toggles the state of objects, components and particle systems based on the state of a TagFilter evaluated 
     /// </summary>
@@ -15,6 +18,7 @@ namespace LowEndGames.ObjectTagSystem
         [SerializeField] private MonoBehaviour[] m_components = new MonoBehaviour[] {};
         [SerializeField] private GameObject[] m_gameObjects = new GameObject[] {};
         [SerializeField] private ParticleSystem[] m_particleSystems = new  ParticleSystem[] {};
+        [SerializeField] private BoolEvent m_onStateChanged = new BoolEvent();
 
         // -------------------------------------------------- private
         
@@ -72,6 +76,7 @@ namespace LowEndGames.ObjectTagSystem
                 }
 
                 m_state = state;
+                m_onStateChanged.Invoke(state);
             }
         }
     }

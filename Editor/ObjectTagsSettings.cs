@@ -8,6 +8,7 @@ namespace LowEndGames.ObjectTagSystem.EditorTools
     {
         public string GenerationFolder = "Scripts/Generated/";
         public string GenerationCodeNamespace = "LowEndGames.Generated";
+        public bool DetectNewTagsOnImport = true;
         
         public const string AssetPath = "Assets/Editor/ObjectTagsSystemSettings.asset";
         
@@ -43,6 +44,7 @@ namespace LowEndGames.ObjectTagSystem.EditorTools
                     var settings = GetSerializedSettings();
                     EditorGUILayout.PropertyField(settings.FindProperty(nameof(GenerationFolder)));
                     EditorGUILayout.PropertyField(settings.FindProperty(nameof(GenerationCodeNamespace)));
+                    EditorGUILayout.PropertyField(settings.FindProperty(nameof(DetectNewTagsOnImport)));
                     settings.ApplyModifiedPropertiesWithoutUndo();
                 },
 

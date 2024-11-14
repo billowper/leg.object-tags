@@ -11,6 +11,7 @@ namespace LowEndGames.ObjectTagSystem
     {
         [SerializeField] private ParticleSystem m_particleSystem;
         [SerializeField] private List<TagAction> m_actions = new List<TagAction>(); 
+        [SerializeField] private bool m_force;
 
         private readonly List<ParticleCollisionEvent> m_collisionEvents = new List<ParticleCollisionEvent>();
 
@@ -38,7 +39,7 @@ namespace LowEndGames.ObjectTagSystem
             {
                 if (m_collisionEvents[i].colliderComponent.TryGetComponentInParent<ITagOwner>(out var tagOwner))
                 {
-                    m_actions.ApplyTo(tagOwner);
+                    m_actions.ApplyTo(tagOwner, m_force);
                 }     
                 
                 i++;

@@ -11,6 +11,7 @@ namespace LowEndGames.ObjectTagSystem
         [SerializeField] private TagsFilter m_filter = new TagsFilter();
         [SerializeField] private List<TagAction> m_actionsOnEnter; 
         [SerializeField] private List<TagAction> m_actionsOnExit; 
+        [SerializeField] private bool m_force; 
 
         // -------------------------------------------------- private
         
@@ -18,7 +19,7 @@ namespace LowEndGames.ObjectTagSystem
         {
             if (other.TryGetComponentInParent<ITagOwner>(out var tagOwner) && m_filter.Check(tagOwner))
             {
-                m_actionsOnEnter.ApplyTo(tagOwner);
+                m_actionsOnEnter.ApplyTo(tagOwner, m_force);
             }
         }
 
@@ -26,7 +27,7 @@ namespace LowEndGames.ObjectTagSystem
         {
             if (other.TryGetComponentInParent<ITagOwner>(out var tagOwner) && m_filter.Check(tagOwner))
             {
-                m_actionsOnExit.ApplyTo(tagOwner);
+                m_actionsOnExit.ApplyTo(tagOwner, m_force);
             }
         }
     }

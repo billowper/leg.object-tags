@@ -17,15 +17,15 @@ namespace LowEndGames.ObjectTagSystem
         public TagActions Action;
         public ObjectTag Tag;
 
-        public void Apply(ITagOwner target)
+        public void Apply(ITagOwner target, bool force)
         {
             switch (Action)
             {
                 case TagActions.Add:
-                    target.AddTag(Tag);
+                    target.AddTag(Tag, true, force);
                     break;
                 case TagActions.Remove:
-                    target.RemoveTag(Tag);
+                    target.RemoveTag(Tag, force);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

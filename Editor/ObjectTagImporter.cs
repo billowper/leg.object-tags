@@ -24,6 +24,11 @@ namespace LowEndGames.ObjectTagSystem.EditorTools
             {
                 return;
             }
+
+            if (settings.DetectNewTagsOnImport == false)
+            {
+                return;
+            }
             
             var assetNames = GetAllObjectTags().Select(a => a.GetEnumValueName()).ToList();
             

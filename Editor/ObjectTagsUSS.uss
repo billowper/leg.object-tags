@@ -2,12 +2,14 @@
     flex-direction: row;
 }
 
-.fg-30{
-    flex-grow: .3;
-}
-.fg-100{
-    flex-grow: 1;
-}
+.fg-20{ flex-grow: .2; }
+.fg-30{ flex-grow: .3; }
+.fg-40{ flex-grow: .4; }
+.fg-50{ flex-grow: .5; }
+.fg-60{ flex-grow: .5; }
+.fg-70{ flex-grow: .7; }
+.fg-80{ flex-grow: .7; }
+.fg-100{ flex-grow: 1; }
 
 .info-box {
     padding: 12px;
