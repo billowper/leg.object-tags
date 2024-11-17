@@ -279,14 +279,19 @@ namespace LowEndGames.ObjectTagSystem
         /// <summary>
         /// Updates rule timers and applies <see cref="ObjectTagsInteractionRule.Actions"/> when conditions are met.
         /// </summary>
-        public void Update()
+        public void Update(float deltaTime)
         {
             foreach (var value in m_tagStates.Values)
             {
                 if (value.IsOn)
                 {
-                    value.ElapsedTime += Time.deltaTime;
+                    value.ElapsedTime += deltaTime;
                 }
+            }
+
+            if (m_tagChangesBlocked.IsRequested)
+            {
+                return;
             }
             
             foreach (var rule in ObjectTagsInteractionRule.Self)
@@ -296,7 +301,7 @@ namespace LowEndGames.ObjectTagSystem
                     var timeOverride = m_configuration.RuleTimeOverrides.Find(o => o.Rule == rule);
                     var requiredTime = timeOverride?.OverrideRequiredTime ?? rule.RequiredTime;
                    
-                    m_ruleTimers[rule] += Time.deltaTime;
+                    m_ruleTimers[rule] += deltaTime;
 
                     if (m_ruleTimers[rule] > requiredTime)
                     {

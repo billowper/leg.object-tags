@@ -68,7 +68,7 @@ namespace LowEndGames.ObjectTagSystem
 
         private void Update()
         {
-            m_tagOwner.Update();
+            m_tagOwner.Update(Time.deltaTime);
         }
 
 #if UNITY_EDITOR
