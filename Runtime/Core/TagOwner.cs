@@ -33,7 +33,7 @@ namespace LowEndGames.ObjectTagSystem
             
             foreach (var tag in ObjectTagsLoader.Tags)
             {
-                m_tagStates.Add(tag, new TagState(tag));
+                m_tagStates.Add(tag, new TagState(this, tag));
             }
 
             foreach (var rule in ObjectTagsInteractionRule.All)
@@ -45,7 +45,7 @@ namespace LowEndGames.ObjectTagSystem
 
             if (m_configuration.BlockTagChanges)
             {
-                m_tagChangesBlocked.RequestService(new CancelToken());
+                BlockChangesWhile(m_blockTagChangesWhile);
             }
         }
         
@@ -85,8 +85,9 @@ namespace LowEndGames.ObjectTagSystem
 
             if (m_configuration.BlockTagChanges)
             {
-                m_tagChangesBlocked.RequestService(new CancelToken());
-            }
+                m_blockTagChangesWhile.Reset();
+                BlockChangesWhile(m_blockTagChangesWhile);
+            }   
         }
 
         public bool HasTag(ObjectTag objectTag) => m_tagStates[objectTag].IsOn;
@@ -95,10 +96,26 @@ namespace LowEndGames.ObjectTagSystem
         /// Attempts to add a tag to the TagOwner, applying <see cref="ObjectTag.ActionsOnAdded"/>
         /// and invoking related events if successful.
         /// </summary>
+        /// <param name="objectTag">the tag to add</param>
+        /// <param name="runFilters">if true, run the tag's filters against this owner to make sure it is valid</param>
+        /// <param name="force">if true, ignore anything that would prevent the tag being added</param>
         public bool AddTag(ObjectTag objectTag, bool runFilters = true, bool force = false)
         {
-            if ((!force && m_tagChangesBlocked.IsRequested) || HasTag(objectTag))
+            if (!force && m_tagChangesBlocked.IsRequested)
             {
+                Debug.Log($"{m_name}:AddTag - cannot add '{objectTag.name}', global tag changes blocked ({m_tagChangesBlocked.TokenIdentifiers}).");
+                return false;
+            }
+            
+            var state = m_tagStates[objectTag];
+            if (state.IsOn)
+            {
+                return false;
+            }
+            
+            if (!force && state.IsBlocked)
+            {
+                Debug.Log($"{m_name}:AddTag - cannot add '{objectTag.name}', changes blocked ({state.IsBlockedIdentifiers})");
                 return false;
             }
 
@@ -114,17 +131,15 @@ namespace LowEndGames.ObjectTagSystem
                 AddBehaviour(tagBehaviour);
             }
             
-            var state = m_tagStates[objectTag];
-
             state.SetState(true);
             
             TagAdded.Invoke(objectTag);
             TagsChanged.Invoke();
             
-            AddTagsWhile(objectTag.ForcedTagsWhileActive, state.WhileActive);
-            BlockTagsWhile(objectTag.BlockedTagsWhileActive, state.WhileActive);
+            ForceOnWhile(objectTag.ForcedTagsWhileActive, state.WhileActive);
+            ForceOffWhile(objectTag.BlockedTagsWhileActive, state.WhileActive);
             
-            Debug.Log($"{m_name}:Tag Added '{objectTag.name}'");
+            Debug.Log($"{m_name}:AddTag '{objectTag.name}' added");
             
             return true;
         }
@@ -133,21 +148,28 @@ namespace LowEndGames.ObjectTagSystem
         /// Attempts to remove a tag from the TagOwner, applying <see cref="ObjectTag.ActionsOnRemoved"/>
         /// and invoking related events if successful.
         /// </summary>
+        /// <param name="objectTag">the tag to remove</param>
+        /// <param name="force">if true, ignore anything that would prevent the tag being removed</param>
         public bool RemoveTag(ObjectTag objectTag, bool force = false)
         {
             if (!force && m_tagChangesBlocked.IsRequested)
             {
-                Debug.Log($"{m_name}:RemoveTag, cannot removed, TagChangesBlocked = true.");
-                return false;
-            }
-
-            if (!force && m_tagStates[objectTag].ForcedOn.IsRequested)
-            {
-                Debug.Log($"{m_name}:RemoveTag, cannot removed, ForcedOn = true.");
+                Debug.Log($"{m_name}:RemoveTag - cannot remove '{objectTag.name}', global tag changes blocked ({m_tagChangesBlocked.TokenIdentifiers}).");
                 return false;
             }
             
             var state = m_tagStates[objectTag];
+
+            if (state.IsOn == false)
+            {
+                return false;
+            }
+
+            if (!force && m_tagStates[objectTag].IsForcedOn)
+            {
+                Debug.Log($"{m_name}:RemoveTag - cannot remove '{objectTag.name}', ForcedOn = true.");
+                return false;
+            }
             
             if (state.IsOn)
             {
@@ -163,7 +185,7 @@ namespace LowEndGames.ObjectTagSystem
 
                 state.SetState(false);
                 
-                Debug.Log($"{m_name}:Tag Removed '{objectTag.name}'");
+                Debug.Log($"{m_name}:RemoveTag '{objectTag.name}' removed");
                 
                 return true;
             }
@@ -203,6 +225,9 @@ namespace LowEndGames.ObjectTagSystem
             }
         }
 
+        /// <summary>
+        /// removes all tags
+        /// </summary>
         public void ClearAll()
         {
             foreach (var pair in m_tagStates)
@@ -210,28 +235,39 @@ namespace LowEndGames.ObjectTagSystem
                 pair.Value.SetState(false);
             }
         }
+
+        /// <summary>
+        /// prevent all tag changes until the <see cref="CancelToken"/> is cancelled
+        /// </summary>
+        /// <param name="token"></param>
+        public void BlockChangesWhile(CancelToken token)
+        {
+            m_tagChangesBlocked.RequestService(token);
+        }
         
-        public void BlockChangesWhile(CancelToken token) => m_tagChangesBlocked.RequestService(token);
-        
-        public void AddTagsWhile(IEnumerable<ObjectTag> tags, CancelToken cancelToken)
+        /// <summary>
+        /// add and prevent them from being removed until the <see cref="CancelToken"/> is cancelled
+        /// </summary>
+        /// <param name="tags"></param>
+        /// <param name="cancelToken"></param>
+        public void ForceOnWhile(IEnumerable<ObjectTag> tags, CancelToken cancelToken)
         {
             foreach (var tag in tags)
             {
-                if (m_tagStates[tag].ForcedOn.RequestService(cancelToken))
-                {
-                    AddTag(tag);
-                }
+                m_tagStates[tag].AddWhile(cancelToken);
             }
         }
 
-        public void BlockTagsWhile(IEnumerable<ObjectTag> tags, CancelToken cancelToken)
+        /// <summary>
+        /// remove and prevent these tags from being added until the <see cref="CancelToken"/> is cancelled (ref counted, so all tokens must be cancelled)
+        /// </summary>
+        /// <param name="tags"></param>
+        /// <param name="cancelToken"></param>
+        public void ForceOffWhile(IEnumerable<ObjectTag> tags, CancelToken cancelToken)
         {
             foreach (var tag in tags)
             {
-                if (m_tagStates[tag].Blocked.RequestService(cancelToken))
-                {
-                    RemoveTag(tag);
-                }
+                m_tagStates[tag].BlockWhile(cancelToken);
             }
         }
         
@@ -290,22 +326,31 @@ namespace LowEndGames.ObjectTagSystem
         private readonly Dictionary<ObjectTag, TagState> m_tagStates = new(128);
         private readonly Dictionary<ObjectTagsInteractionRule, float> m_ruleTimers = new(128);
         private readonly List<ITagBehaviour> m_behaviours = new();
+        private readonly CancelToken m_blockTagChangesWhile = new CancelToken(CancelToken.InitStates.Reset);
         private readonly TokenCounter m_tagChangesBlocked = new TokenCounter();
-        private readonly CancelToken m_blockTagChangesWhile;
 
         private class TagState
         {
             public bool IsOn { get; private set; }
+            public bool IsBlocked => m_blocked.IsRequested;
+            public bool IsForcedOn => m_forcedOn.IsRequested;
             public float ElapsedTime { get; set; }
-            public TokenCounter ForcedOn { get; } = new TokenCounter();
-            public TokenCounter Blocked { get; } = new TokenCounter();
             public CancelToken WhileActive { get; }
+            public string IsBlockedIdentifiers => m_blocked.TokenIdentifiers;
 
-            public TagState(ObjectTag tag)
+            public TagState(TagOwner owner, ObjectTag tag)
             {
+                m_tag = tag;
+                m_owner = owner;
+                
                 WhileActive = new CancelToken($"{tag.EnumStringValue}");
-            }
 
+                m_forcedOn = new TokenCounter();
+                m_forcedOn.Released += OnForcedOnReleased;
+                
+                m_blocked = new TokenCounter();
+            }
+            
             public void SetState(bool isOn)
             {
                 IsOn = isOn;
@@ -319,6 +364,33 @@ namespace LowEndGames.ObjectTagSystem
                 {
                     WhileActive.Cancel();
                 }
+            }
+
+            public void AddWhile(CancelToken cancelToken)
+            {
+                if (m_forcedOn.RequestService(cancelToken))
+                {
+                    m_owner.AddTag(m_tag);
+                }
+            }
+
+            public void BlockWhile(CancelToken cancelToken)
+            {
+                if (m_blocked.RequestService(cancelToken))
+                {
+                    m_owner.RemoveTag(m_tag);
+                }
+            }
+
+            private readonly ObjectTag m_tag;
+            private readonly TagOwner m_owner;
+
+            private TokenCounter m_forcedOn;
+            private TokenCounter m_blocked;
+            
+            private void OnForcedOnReleased()
+            {
+                m_owner.RemoveTag(m_tag);
             }
         }
     }

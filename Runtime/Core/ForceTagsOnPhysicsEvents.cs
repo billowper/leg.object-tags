@@ -55,7 +55,7 @@ namespace LowEndGames.ObjectTagSystem
             {
                 GenericPool<CancelToken>.Get(out var cancelToken);
                 cancelToken.Reset();
-                tagOwner.AddTagsWhile(m_objectTags, cancelToken);
+                tagOwner.ForceOnWhile(m_objectTags, cancelToken);
                 m_tokens.Add(tagOwner, cancelToken);
             }
         }

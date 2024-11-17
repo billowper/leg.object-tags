@@ -11,7 +11,7 @@ namespace LowEndGames.ObjectTagSystem
             Reset,
         }
         
-        public event Action Cancelled = () => { };
+        public event Action<CancelToken> Cancelled = (t) => { };
         
         public bool IsCancelled { get; private set; }
         
@@ -38,13 +38,13 @@ namespace LowEndGames.ObjectTagSystem
         {
             Assert.IsFalse(IsCancelled, "should not already be cancelled");
             IsCancelled = true;
-            Cancelled();
+            Cancelled(this);
         }
 		
         public void Reset()
         {
             IsCancelled = false;
-            Cancelled = () => { };
+            Cancelled = (t) => { };
         }
 
         public override string ToString()
