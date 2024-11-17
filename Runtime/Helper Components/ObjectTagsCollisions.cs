@@ -14,7 +14,7 @@ namespace LowEndGames.ObjectTagSystem
         [SerializeField] private bool m_collision = true;
         [SerializeField] private bool m_force = true;
 
-        private readonly List<TaggedObject> m_objectsAffected = new(32);
+        private readonly List<ITagOwner> m_objectsAffected = new(32);
         private float m_tickTime;
 
         private void OnCollisionEnter(Collision collision)
@@ -24,20 +24,20 @@ namespace LowEndGames.ObjectTagSystem
                 OnEnter(collision.collider);
             }
         }
+        
+        private void OnCollisionExit(Collision collision)
+        {
+            if (m_collision)
+            {
+                OnExit(collision.collider);
+            }
+        }
 
         private void OnTriggerEnter(Collider other)
         {
             if (m_trigger)
             {
                 OnEnter(other);
-            }
-        }
-
-        private void OnCollisionExit(Collision collision)
-        {
-            if (m_collision)
-            {
-                OnExit(collision.collider);
             }
         }
 
@@ -56,11 +56,11 @@ namespace LowEndGames.ObjectTagSystem
                 return;
             }
             
-            if (other.TryGetComponentInParent<TaggedObject>(out var target))
+            if (other.TryGetComponentInParent<ITagOwner>(out var tagOwner) && m_objectsAffected.Contains(tagOwner) == false)
             {
-                m_objectsAffected.Add(target);
+                m_objectsAffected.Add(tagOwner);
 
-                ApplyTagActionsFromRules(target);
+                ApplyTagActionsFromRules(tagOwner);
             }
         }
 
@@ -71,27 +71,27 @@ namespace LowEndGames.ObjectTagSystem
                 return;
             }
             
-            if (other.TryGetComponentInParent<TaggedObject>(out var tagsComponent))
+            if (other.TryGetComponentInParent<ITagOwner>(out var tagOwner))
             {
-                if (m_objectsAffected.Remove(tagsComponent))
+                if (m_objectsAffected.Remove(tagOwner))
                 {
-                    RemoveTagsFromRules(tagsComponent);
+                    RemoveTagsFromRules(tagOwner);
                 }
             }
         }
         
-        private void ApplyTagActionsFromRules(TaggedObject target)
+        private void ApplyTagActionsFromRules(ITagOwner tagOwner)
         {
             foreach (var rule in ObjectTagsInteractionRule.Global)
             {
                 if (rule.Filters.EvaluateFilters(m_objectTags))
                 {
-                    rule.Actions.ApplyTo(target, m_force);
+                    rule.Actions.ApplyTo(tagOwner, m_force);
                 }
             }
         }
 
-        private void RemoveTagsFromRules(TaggedObject tagsComponent)
+        private void RemoveTagsFromRules(ITagOwner tagOwner)
         {
             foreach (var rule in ObjectTagsInteractionRule.Global)
             {
@@ -99,7 +99,7 @@ namespace LowEndGames.ObjectTagSystem
                 {
                     if (tagAction.Action is TagAction.TagActions.Add)
                     {
-                        tagsComponent.RemoveTag(tagAction.Tag);
+                        tagOwner.RemoveTag(tagAction.Tag);
                     }
                 }
             }
@@ -121,9 +121,9 @@ namespace LowEndGames.ObjectTagSystem
                     }
                 }
 
-                foreach (var tagsComponent in m_objectsAffected)
+                foreach (var tagOwner in m_objectsAffected)
                 {
-                    ApplyTagActionsFromRules(tagsComponent);
+                    ApplyTagActionsFromRules(tagOwner);
                 }
             }
         }

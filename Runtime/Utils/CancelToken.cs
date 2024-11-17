@@ -36,11 +36,11 @@ namespace LowEndGames.ObjectTagSystem
 
         public void Cancel()
         {
-            Assert.IsFalse(IsCancelled, "should not already be cancelled");
             IsCancelled = true;
             Cancelled(this);
         }
 		
+
         public void Reset()
         {
             IsCancelled = false;
