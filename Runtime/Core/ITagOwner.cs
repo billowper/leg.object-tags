@@ -8,7 +8,7 @@ namespace LowEndGames.ObjectTagSystem
         ObjectTagEvent TagAdded { get; }
         ObjectTagEvent TagRemoved { get; }
         UnityEvent TagsChanged { get; }
-        IEnumerable<ObjectTag> Tags { get; }
+        IEnumerable<ObjectTag> GetActiveTags();
         
         bool HasTag(ObjectTag objectTag);
         bool AddTag(ObjectTag objectTag, bool runFilters = true, bool force = false);
@@ -20,8 +20,11 @@ namespace LowEndGames.ObjectTagSystem
         void RemoveBehaviour(TagBehaviourSettings tagBehaviourSettings);
         
         void BlockChangesWhile(CancelToken cancelToken);
-        void ForceTagsWhile(IEnumerable<ObjectTag> tags, CancelToken cancelToken);
+        void AddTagsWhile(IEnumerable<ObjectTag> tags, CancelToken cancelToken);
+        void BlockTagsWhile(IEnumerable<ObjectTag> tags, CancelToken cancelToken);
 
         void ClearAll();
+
+        float GetTagTime(ObjectTag objectTag);
     }
 }

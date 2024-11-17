@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using UnityEngine.Assertions;
-using UnityEngine.Events;
 
 namespace LowEndGames.ObjectTagSystem
 {
@@ -15,9 +14,10 @@ namespace LowEndGames.ObjectTagSystem
         [Tooltip("TagsFilter will be evaluated for this object. Required, auto-populated in OnValidate.")]
         [SerializeField] private TaggedObject m_taggedObject; 
         [SerializeField] private TagsFilter m_filter = new(); 
-        [SerializeField] private MonoBehaviour[] m_components = new MonoBehaviour[] {};
+        [SerializeField] private Behaviour[] m_components = new Behaviour[] {};
         [SerializeField] private GameObject[] m_gameObjects = new GameObject[] {};
         [SerializeField] private ParticleSystem[] m_particleSystems = new  ParticleSystem[] {};
+        [SerializeField] private Renderer[] m_renderers = new  Renderer[] {};
         [SerializeField] private BoolEvent m_onStateChanged = new BoolEvent();
 
         // -------------------------------------------------- private
@@ -53,9 +53,14 @@ namespace LowEndGames.ObjectTagSystem
 
             if (state != m_state || force)
             {
-                foreach (var go in m_components)
+                foreach (var c in m_components)
                 {
-                    go.enabled = state;
+                    c.enabled = state;
+                }
+                
+                foreach (var r in m_renderers)
+                {
+                    r.enabled = state;
                 }
                 
                 foreach (var go in m_gameObjects)

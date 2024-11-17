@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
@@ -24,6 +23,7 @@ namespace LowEndGames.ObjectTagSystem
             UnityEvent tagsChanged)
         {
             GameObject = gameObject;
+            
             m_name = name;
             m_configuration = configuration;
             
@@ -33,7 +33,7 @@ namespace LowEndGames.ObjectTagSystem
             
             foreach (var tag in ObjectTagsLoader.Tags)
             {
-                m_tagForcedTokenCounters.Add(tag, new TokenCounter());
+                m_tagStates.Add(tag, new TagState(tag));
             }
 
             foreach (var rule in ObjectTagsInteractionRule.All)
@@ -51,7 +51,16 @@ namespace LowEndGames.ObjectTagSystem
         
         public GameObject GameObject { get; private set; }
 
-        public IEnumerable<ObjectTag> Tags => m_tags;
+        public IEnumerable<ObjectTag> GetActiveTags()
+        {
+            foreach (var pair in m_tagStates)
+            {
+                if (pair.Value.IsOn)
+                {
+                    yield return pair.Key;
+                }
+            }
+        }
         
         /// <summary>
         /// Event triggered when a new tag is successfully added to the TagOwner.
@@ -80,7 +89,7 @@ namespace LowEndGames.ObjectTagSystem
             }
         }
 
-        public bool HasTag(ObjectTag objectTag) => m_tags.Contains(objectTag);
+        public bool HasTag(ObjectTag objectTag) => m_tagStates[objectTag].IsOn;
 
         /// <summary>
         /// Attempts to add a tag to the TagOwner, applying <see cref="ObjectTag.ActionsOnAdded"/>
@@ -105,9 +114,15 @@ namespace LowEndGames.ObjectTagSystem
                 AddBehaviour(tagBehaviour);
             }
             
-            m_tags.Add(objectTag);
+            var state = m_tagStates[objectTag];
+
+            state.SetState(true);
+            
             TagAdded.Invoke(objectTag);
             TagsChanged.Invoke();
+            
+            AddTagsWhile(objectTag.ForcedTagsWhileActive, state.WhileActive);
+            BlockTagsWhile(objectTag.BlockedTagsWhileActive, state.WhileActive);
             
             Debug.Log($"{m_name}:Tag Added '{objectTag.name}'");
             
@@ -122,15 +137,19 @@ namespace LowEndGames.ObjectTagSystem
         {
             if (!force && m_tagChangesBlocked.IsRequested)
             {
+                Debug.Log($"{m_name}:RemoveTag, cannot removed, TagChangesBlocked = true.");
                 return false;
             }
 
-            if (m_tagForcedTokenCounters[objectTag].IsRequested)
+            if (!force && m_tagStates[objectTag].ForcedOn.IsRequested)
             {
+                Debug.Log($"{m_name}:RemoveTag, cannot removed, ForcedOn = true.");
                 return false;
             }
             
-            if (m_tags.Remove(objectTag))
+            var state = m_tagStates[objectTag];
+            
+            if (state.IsOn)
             {
                 foreach (var tagBehaviour in objectTag.Behaviours)
                 {
@@ -141,8 +160,11 @@ namespace LowEndGames.ObjectTagSystem
 
                 TagRemoved.Invoke(objectTag);
                 TagsChanged.Invoke();
+
+                state.SetState(false);
                 
                 Debug.Log($"{m_name}:Tag Removed '{objectTag.name}'");
+                
                 return true;
             }
             
@@ -181,19 +203,41 @@ namespace LowEndGames.ObjectTagSystem
             }
         }
 
-        public void ClearAll() => m_tags.Clear();
-
+        public void ClearAll()
+        {
+            foreach (var pair in m_tagStates)
+            {
+                pair.Value.SetState(false);
+            }
+        }
+        
         public void BlockChangesWhile(CancelToken token) => m_tagChangesBlocked.RequestService(token);
         
-        public void ForceTagsWhile(IEnumerable<ObjectTag> tags, CancelToken cancelToken)
+        public void AddTagsWhile(IEnumerable<ObjectTag> tags, CancelToken cancelToken)
         {
             foreach (var tag in tags)
             {
-                if (m_tagForcedTokenCounters[tag].RequestService(cancelToken))
+                if (m_tagStates[tag].ForcedOn.RequestService(cancelToken))
                 {
                     AddTag(tag);
                 }
             }
+        }
+
+        public void BlockTagsWhile(IEnumerable<ObjectTag> tags, CancelToken cancelToken)
+        {
+            foreach (var tag in tags)
+            {
+                if (m_tagStates[tag].Blocked.RequestService(cancelToken))
+                {
+                    RemoveTag(tag);
+                }
+            }
+        }
+        
+        public float GetTagTime(ObjectTag objectTag)
+        {
+            return m_tagStates[objectTag].ElapsedTime;
         }
 
         /// <summary>
@@ -201,6 +245,14 @@ namespace LowEndGames.ObjectTagSystem
         /// </summary>
         public void Update()
         {
+            foreach (var value in m_tagStates.Values)
+            {
+                if (value.IsOn)
+                {
+                    value.ElapsedTime += Time.deltaTime;
+                }
+            }
+            
             foreach (var rule in ObjectTagsInteractionRule.Self)
             {
                 if (rule.Filters.EvaluateFilters(this))
@@ -225,7 +277,9 @@ namespace LowEndGames.ObjectTagSystem
 #if UNITY_EDITOR
         public void OnDrawGizmos(Transform transform)
         {
-            UnityEditor.Handles.Label(transform.position + Vector3.up, new GUIContent(string.Join("\n", m_tags.Select(t => t.name.Split('.').Last()))), new GUIStyle("label") { wordWrap = false, richText = true, stretchWidth = true});
+            UnityEditor.Handles.Label(transform.position + Vector3.up, new GUIContent(string.Join("\n", m_tagStates
+                .Where(t => t.Value.IsOn)
+                .Select(t => $"{t.Key.name.Split('.').Last()} - {t.Value.ElapsedTime:F2}"))), new GUIStyle("label") { wordWrap = false, richText = true, stretchWidth = true});
         }
 #endif
         
@@ -233,11 +287,39 @@ namespace LowEndGames.ObjectTagSystem
 
         private string m_name;
         private TagOwnerConfiguration m_configuration;
-        private readonly HashSet<ObjectTag> m_tags = new(32);
+        private readonly Dictionary<ObjectTag, TagState> m_tagStates = new(128);
         private readonly Dictionary<ObjectTagsInteractionRule, float> m_ruleTimers = new(128);
-        private readonly Dictionary<ObjectTag, TokenCounter> m_tagForcedTokenCounters = new(128);
         private readonly List<ITagBehaviour> m_behaviours = new();
         private readonly TokenCounter m_tagChangesBlocked = new TokenCounter();
-        private CancelToken m_blockTagChangesWhile;
+        private readonly CancelToken m_blockTagChangesWhile;
+
+        private class TagState
+        {
+            public bool IsOn { get; private set; }
+            public float ElapsedTime { get; set; }
+            public TokenCounter ForcedOn { get; } = new TokenCounter();
+            public TokenCounter Blocked { get; } = new TokenCounter();
+            public CancelToken WhileActive { get; }
+
+            public TagState(ObjectTag tag)
+            {
+                WhileActive = new CancelToken($"{tag.EnumStringValue}");
+            }
+
+            public void SetState(bool isOn)
+            {
+                IsOn = isOn;
+                ElapsedTime = 0;
+
+                if (isOn)
+                {
+                    WhileActive.Reset();
+                }
+                else
+                {
+                    WhileActive.Cancel();
+                }
+            }
+        }
     }
 }

@@ -20,7 +20,7 @@ namespace LowEndGames.ObjectTagSystem
 
         public UnityEvent TagsChanged => m_tagOwner.TagsChanged;
 
-        public IEnumerable<ObjectTag> Tags => m_tagOwner.Tags;
+        public IEnumerable<ObjectTag> GetActiveTags() => m_tagOwner.GetActiveTags();
 
         public void ApplyConfig(TagOwnerConfiguration configuration)
         {
@@ -47,12 +47,19 @@ namespace LowEndGames.ObjectTagSystem
             m_tagOwner.BlockChangesWhile(cancelToken);
         }
 
-        public void ForceTagsWhile(IEnumerable<ObjectTag> tags, CancelToken cancelToken)
+        public void AddTagsWhile(IEnumerable<ObjectTag> tags, CancelToken cancelToken)
         {
-            m_tagOwner.ForceTagsWhile(tags, cancelToken);
+            m_tagOwner.AddTagsWhile(tags, cancelToken);
+        }
+
+        public void BlockTagsWhile(IEnumerable<ObjectTag> tags, CancelToken cancelToken)
+        {
+            m_tagOwner.BlockTagsWhile(tags, cancelToken);
         }
 
         public void ClearAll() => m_tagOwner.ClearAll();
+        
+        public float GetTagTime(ObjectTag objectTag) => m_tagOwner.GetTagTime(objectTag);
 
         // -------------------------------------------------- private
         
