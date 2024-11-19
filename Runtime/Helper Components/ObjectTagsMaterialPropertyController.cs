@@ -21,6 +21,7 @@ namespace LowEndGames.ObjectTagSystem
         {
             public bool IsAnimating { get; set; }
             public float Value { get; set; }
+            public bool HasTag { get; set; }
 
             public ObjectTag Tag;
             public string PropertyName;
@@ -74,11 +75,17 @@ namespace LowEndGames.ObjectTagSystem
         {
             foreach (var mapping in m_propertyMappings)
             {
+                mapping.HasTag = m_tagsComponent.HasTag(mapping.Tag);
+                
                 if (mapping.IsAnimating)
                 {
                     mapping.UpdateTween(Time.deltaTime);
-            
                     SetMaterialValues(mapping, mapping.Value);
+                }
+
+                else
+                {
+                    SetMaterialValues(mapping, mapping.HasTag ? mapping.TargetValue : 0);
                 }
             }
         }
@@ -89,6 +96,7 @@ namespace LowEndGames.ObjectTagSystem
             {
                 if (mapping.Tag == tagAdded)
                 {
+                    mapping.HasTag = true;
                     mapping.StartTween(mapping.TargetValue);
                 }
             }
@@ -100,6 +108,7 @@ namespace LowEndGames.ObjectTagSystem
             {
                 if (mapping.Tag == tagRemoved)
                 {
+                    mapping.HasTag = false; 
                     mapping.StartTween(0);
                 }
             }

@@ -36,7 +36,7 @@ namespace LowEndGames.ObjectTagSystem
                 m_tagStates.Add(tag, new TagState(this, tag));
             }
 
-            foreach (var rule in ObjectTagsInteractionRule.All)
+            foreach (var rule in TagChangeRule.All)
             {
                 m_ruleTimers.Add(rule, 0);
             }
@@ -136,8 +136,16 @@ namespace LowEndGames.ObjectTagSystem
             TagAdded.Invoke(objectTag);
             TagsChanged.Invoke();
             
-            ForceOnWhile(objectTag.ForcedTagsWhileActive, state.WhileActive);
-            ForceOffWhile(objectTag.BlockedTagsWhileActive, state.WhileActive);
+            AddTagsWhile(objectTag.ForcedTagsWhileActive, state.WhileActive);
+            BlockTagsWhile(objectTag.BlockedTagsWhileActive, state.WhileActive);
+            
+            foreach (var changeRule in TagChangeRule.All)
+            {
+                if (changeRule.TimerResetWhenAdded.Contains(objectTag))
+                {
+                    m_ruleTimers[changeRule] = 0;
+                }
+            }
             
             Debug.Log($"{m_name}:AddTag '{objectTag.name}' added");
             
@@ -186,6 +194,14 @@ namespace LowEndGames.ObjectTagSystem
                 state.SetState(false);
                 
                 Debug.Log($"{m_name}:RemoveTag '{objectTag.name}' removed");
+
+                foreach (var changeRule in TagChangeRule.All)
+                {
+                    if (changeRule.TimerResetWhenRemoved.Contains(objectTag))
+                    {
+                        m_ruleTimers[changeRule] = 0;
+                    }
+                }
                 
                 return true;
             }
@@ -250,7 +266,7 @@ namespace LowEndGames.ObjectTagSystem
         /// </summary>
         /// <param name="tags"></param>
         /// <param name="cancelToken"></param>
-        public void ForceOnWhile(IEnumerable<ObjectTag> tags, CancelToken cancelToken)
+        public void AddTagsWhile(IEnumerable<ObjectTag> tags, CancelToken cancelToken)
         {
             foreach (var tag in tags)
             {
@@ -263,7 +279,7 @@ namespace LowEndGames.ObjectTagSystem
         /// </summary>
         /// <param name="tags"></param>
         /// <param name="cancelToken"></param>
-        public void ForceOffWhile(IEnumerable<ObjectTag> tags, CancelToken cancelToken)
+        public void BlockTagsWhile(IEnumerable<ObjectTag> tags, CancelToken cancelToken)
         {
             foreach (var tag in tags)
             {
@@ -277,7 +293,7 @@ namespace LowEndGames.ObjectTagSystem
         }
 
         /// <summary>
-        /// Updates rule timers and applies <see cref="ObjectTagsInteractionRule.Actions"/> when conditions are met.
+        /// Updates rule timers and applies <see cref="TagChangeRule.Actions"/> when conditions are met.
         /// </summary>
         public void Update(float deltaTime)
         {
@@ -294,7 +310,7 @@ namespace LowEndGames.ObjectTagSystem
                 return;
             }
             
-            foreach (var rule in ObjectTagsInteractionRule.Self)
+            foreach (var rule in TagChangeRule.All)
             {
                 if (rule.Filters.EvaluateFilters(this))
                 {
@@ -329,7 +345,7 @@ namespace LowEndGames.ObjectTagSystem
         private string m_name;
         private TagOwnerConfiguration m_configuration;
         private readonly Dictionary<ObjectTag, TagState> m_tagStates = new(128);
-        private readonly Dictionary<ObjectTagsInteractionRule, float> m_ruleTimers = new(128);
+        private readonly Dictionary<TagChangeRule, float> m_ruleTimers = new(128);
         private readonly List<ITagBehaviour> m_behaviours = new();
         private readonly CancelToken m_blockTagChangesWhile = new CancelToken(CancelToken.InitStates.Reset);
         private readonly TokenCounter m_tagChangesBlocked = new TokenCounter();
@@ -337,11 +353,11 @@ namespace LowEndGames.ObjectTagSystem
         private class TagState
         {
             public bool IsOn { get; private set; }
-            public bool IsBlocked => m_blocked.IsRequested;
-            public bool IsForcedOn => m_forcedOn.IsRequested;
+            public bool IsBlocked => m_blockedCounter.IsRequested;
+            public bool IsForcedOn => m_addCounter.IsRequested;
             public float ElapsedTime { get; set; }
             public CancelToken WhileActive { get; }
-            public string IsBlockedIdentifiers => m_blocked.TokenIdentifiers;
+            public string IsBlockedIdentifiers => m_blockedCounter.TokenIdentifiers;
 
             public TagState(TagOwner owner, ObjectTag tag)
             {
@@ -350,10 +366,10 @@ namespace LowEndGames.ObjectTagSystem
                 
                 WhileActive = new CancelToken($"{tag.EnumStringValue}");
 
-                m_forcedOn = new TokenCounter();
-                m_forcedOn.Released += OnForcedOnReleased;
+                m_addCounter = new TokenCounter();
+                m_addCounter.Released += OnAddCounterReleased;
                 
-                m_blocked = new TokenCounter();
+                m_blockedCounter = new TokenCounter();
             }
             
             public void SetState(bool isOn)
@@ -373,7 +389,7 @@ namespace LowEndGames.ObjectTagSystem
 
             public void AddWhile(CancelToken cancelToken)
             {
-                if (m_forcedOn.RequestService(cancelToken))
+                if (m_addCounter.RequestService(cancelToken))
                 {
                     m_owner.AddTag(m_tag);
                 }
@@ -381,7 +397,7 @@ namespace LowEndGames.ObjectTagSystem
 
             public void BlockWhile(CancelToken cancelToken)
             {
-                if (m_blocked.RequestService(cancelToken))
+                if (m_blockedCounter.RequestService(cancelToken))
                 {
                     m_owner.RemoveTag(m_tag);
                 }
@@ -390,10 +406,10 @@ namespace LowEndGames.ObjectTagSystem
             private readonly ObjectTag m_tag;
             private readonly TagOwner m_owner;
 
-            private TokenCounter m_forcedOn;
-            private TokenCounter m_blocked;
+            private TokenCounter m_addCounter;
+            private TokenCounter m_blockedCounter;
             
-            private void OnForcedOnReleased()
+            private void OnAddCounterReleased()
             {
                 m_owner.RemoveTag(m_tag);
             }

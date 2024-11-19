@@ -30,6 +30,7 @@ namespace LowEndGames.ObjectTagSystem
         private bool m_defaultGravity;
         private bool m_defaultKinematic;
         private readonly Dictionary<Collider, PhysicsMaterial> m_originalPhysicsMaterials = new Dictionary<Collider, PhysicsMaterial>();
+        private PhysicsSettings m_lastActiveSettings;
 
         private void Awake()
         {
@@ -48,7 +49,7 @@ namespace LowEndGames.ObjectTagSystem
 
         private void OnTagsChanged()
         {
-            var appliedAnyRules = false;
+            PhysicsSettings newActiveSettings = null;
 
             for (var index = m_rules.Count - 1; index >= 0; index--)
             {
@@ -56,14 +57,20 @@ namespace LowEndGames.ObjectTagSystem
                 if (rule.Filter.Check(m_tagsComponent))
                 {
                     ApplyRule(rule);
-                    appliedAnyRules = true;
+                    newActiveSettings = rule;
                     break;
                 }
             }
 
-            if (appliedAnyRules == false)
+            var activeSettingsDisabled = m_lastActiveSettings != null && newActiveSettings == null;
+            if (activeSettingsDisabled)
             {
                 RestoreDefaults();
+            }
+            
+            if (newActiveSettings != null && newActiveSettings != m_lastActiveSettings)
+            {
+                m_lastActiveSettings = newActiveSettings;
             }
         }
 

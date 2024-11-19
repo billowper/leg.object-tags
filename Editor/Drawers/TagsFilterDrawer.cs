@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using LowEndGames.Utils;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine.Pool;
@@ -11,19 +12,24 @@ namespace LowEndGames.ObjectTagSystem.EditorTools
     {
         public override VisualElement CreatePropertyGUI(SerializedProperty property)
         {
+            var styles = AssetDatabase.LoadAssetAtPath("Packages/leg.object-tags/Editor/ObjectTagsUSS.uss", typeof(StyleSheet)) as StyleSheet;
             var root = new VisualElement();
-
-            var title = new Label(GetFilterTitle(property)).AddTo(root);
             
-            new PropertyField(property.FindPropertyRelative(nameof(TagsFilter.Tags))).AddTo(root).RegisterValueChangeCallback(UpdateTitle);
-            new PropertyField(property.FindPropertyRelative(nameof(TagsFilter.Comparison))).AddTo(root).RegisterValueChangeCallback(UpdateTitle);
-            new PropertyField(property.FindPropertyRelative(nameof(TagsFilter.Invert))).AddTo(root).RegisterValueChangeCallback(UpdateTitle);
+            root.styleSheets.Add(styles);
+            root.AddToClassList("box");
+
+            new Label("Filter".Bold()).AddTo(root);
+            var description = new Label(GetFilterTitle(property)).AddTo(root);
+            
+            new PropertyField(property.FindPropertyRelative(nameof(TagsFilter.Tags))).AddTo(root).RegisterValueChangeCallback(UpdateDescription);
+            new PropertyField(property.FindPropertyRelative(nameof(TagsFilter.Comparison))).AddTo(root).RegisterValueChangeCallback(UpdateDescription);
+            new PropertyField(property.FindPropertyRelative(nameof(TagsFilter.Invert))).AddTo(root).RegisterValueChangeCallback(UpdateDescription);
             
             return root;
             
-            void UpdateTitle(SerializedPropertyChangeEvent evt)
+            void UpdateDescription(SerializedPropertyChangeEvent evt)
             {
-                title.text = GetFilterTitle(property);
+                description.text = GetFilterTitle(property);
             }
         }
 

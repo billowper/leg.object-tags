@@ -6,4 +6,6 @@
     <uie:PropertyField binding-path="RequiredTime" name="Prop_RequiredTime" style="display: flex;" />
     <uie:PropertyField binding-path="Filters" name="Prop_Filters" style="padding-top: 8px;" />
     <uie:PropertyField binding-path="Actions" name="Prop_Actions" style="padding-top: 8px;" />
+    <uie:PropertyField binding-path="TimerResetWhenAdded" name="Prop_TimerResetWhenAdded" style="padding-top: 8px;" />
+    <uie:PropertyField binding-path="TimerResetWhenRemoved" name="Prop_TimerResetWhenRemoved" style="padding-top: 8px;" />
 </ui:UXML>

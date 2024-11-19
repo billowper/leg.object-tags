@@ -44,9 +44,9 @@ namespace LowEndGames.ObjectTagSystem
         
         public void BlockChangesWhile(CancelToken cancelToken) => m_tagOwner.BlockChangesWhile(cancelToken);
 
-        public void ForceOnWhile(IEnumerable<ObjectTag> tags, CancelToken cancelToken) => m_tagOwner.ForceOnWhile(tags, cancelToken);
+        public void AddTagsWhile(IEnumerable<ObjectTag> tags, CancelToken cancelToken) => m_tagOwner.AddTagsWhile(tags, cancelToken);
 
-        public void ForceOffWhile(IEnumerable<ObjectTag> tags, CancelToken cancelToken) => m_tagOwner.ForceOffWhile(tags, cancelToken);
+        public void BlockTagsWhile(IEnumerable<ObjectTag> tags, CancelToken cancelToken) => m_tagOwner.BlockTagsWhile(tags, cancelToken);
 
         public void ClearAll() => m_tagOwner.ClearAll();
         

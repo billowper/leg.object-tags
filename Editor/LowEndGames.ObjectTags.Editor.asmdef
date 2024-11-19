@@ -2,7 +2,8 @@
     "name": "LowEndGames.ObjectTags.Editor",
     "rootNamespace": "LowEndGames.ObjectTagSystem.EditorTools",
     "references": [
-        "LowEndGames.ObjectTags.Runtime"
+        "LowEndGames.ObjectTags.Runtime",
+        "LowEndGames.Utils.Runtime"
     ],
     "includePlatforms": [
         "Editor"

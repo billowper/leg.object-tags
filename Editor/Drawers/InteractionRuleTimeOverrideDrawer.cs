@@ -17,7 +17,7 @@ namespace LowEndGames.ObjectTagSystem.EditorTools
             
             var labelField = new Label().AddTo(root);
             
-            if (ruleProp.objectReferenceValue is ObjectTagsInteractionRule rule)
+            if (ruleProp.objectReferenceValue is TagChangeRule rule)
             {
                 labelField.text = rule.GetDescriptionString(overrideTimeProp.floatValue.ToString(CultureInfo.InvariantCulture));
             }
@@ -29,7 +29,7 @@ namespace LowEndGames.ObjectTagSystem.EditorTools
             
             void OnValuesChanged(SerializedPropertyChangeEvent evt)
             {
-                if (ruleProp.objectReferenceValue is ObjectTagsInteractionRule r)
+                if (ruleProp.objectReferenceValue is TagChangeRule r)
                 {
                     labelField.text = r.GetDescriptionString(overrideTimeProp.floatValue.ToString(CultureInfo.InvariantCulture));
                 }

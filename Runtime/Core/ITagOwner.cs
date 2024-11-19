@@ -20,8 +20,8 @@ namespace LowEndGames.ObjectTagSystem
         void RemoveBehaviour(TagBehaviourSettings tagBehaviourSettings);
         
         void BlockChangesWhile(CancelToken cancelToken);
-        void ForceOnWhile(IEnumerable<ObjectTag> tags, CancelToken cancelToken);
-        void ForceOffWhile(IEnumerable<ObjectTag> tags, CancelToken cancelToken);
+        void AddTagsWhile(IEnumerable<ObjectTag> tags, CancelToken cancelToken);
+        void BlockTagsWhile(IEnumerable<ObjectTag> tags, CancelToken cancelToken);
 
         void ClearAll();
 

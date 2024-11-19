@@ -4,7 +4,7 @@ using UnityEngine.Pool;
 
 namespace LowEndGames.ObjectTagSystem
 {
-    public class ForceTagsOnPhysicsEvents : MonoBehaviour
+    public class AddTagsWhileColliding : MonoBehaviour
     {
         [SerializeField] private TagsFilter m_filter = new TagsFilter();
         [SerializeField] private List<ObjectTag> m_objectTags = new List<ObjectTag>();
@@ -55,7 +55,7 @@ namespace LowEndGames.ObjectTagSystem
             {
                 GenericPool<CancelToken>.Get(out var cancelToken);
                 cancelToken.Reset();
-                tagOwner.ForceOnWhile(m_objectTags, cancelToken);
+                tagOwner.AddTagsWhile(m_objectTags, cancelToken);
                 m_tokens.Add(tagOwner, cancelToken);
             }
         }

@@ -6,8 +6,8 @@ using UnityEngine.UIElements;
 
 namespace LowEndGames.ObjectTagSystem.EditorTools
 {
-    [CustomEditor(typeof(ObjectTagsInteractionRule))]
-    public class ObjectTagsInteractionRuleEditor : Editor
+    [CustomEditor(typeof(TagChangeRule))]
+    public class TagChangeRuleEditor : Editor
     {
         [SerializeField] private VisualTreeAsset m_treeAsset;
         
@@ -20,12 +20,8 @@ namespace LowEndGames.ObjectTagSystem.EditorTools
             void OnValueChange(SerializedObject o)
             {
                 var label = m_tree.Q<Label>("DescriptionLabel");
-                var rule = (ObjectTagsInteractionRule)target;
+                var rule = (TagChangeRule)target;
                 label.text = rule.GetDescriptionString(rule.RequiredTime.ToString(CultureInfo.InvariantCulture));
-                
-                var requiredTime = m_tree.Q("Prop_RequiredTime");
-                if (requiredTime != null)
-                    requiredTime.SetEnabled(rule.EvaluationMethod is ObjectTagsInteractionRule.EvaluationMethods.Constant);
             }
             
             m_tree.TrackSerializedObjectValue(serializedObject, OnValueChange);

@@ -6,7 +6,7 @@ namespace LowEndGames.ObjectTagSystem
     [Serializable]
     public class InteractionRuleTimeOverride
     {
-        public ObjectTagsInteractionRule Rule;
+        public TagChangeRule Rule;
         public float OverrideRequiredTime;
 
         [UsedImplicitly] private string InfoBox => Rule != null ? Rule.GetDescriptionString($"{OverrideRequiredTime}") : "";
