@@ -24,6 +24,13 @@ namespace LowEndGames.ObjectTagSystem
 
         public void ApplyConfig(TagOwnerConfiguration configuration)
         {
+            m_tagOwner.Init(m_configuration,
+                gameObject.name,
+                gameObject,
+                m_tagAdded,
+                m_tagRemoved,
+                m_tagsChanged);
+            
             m_configuration = configuration;
             m_tagOwner.ApplyConfig(configuration);
         }

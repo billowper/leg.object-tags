@@ -22,6 +22,9 @@ namespace LowEndGames.ObjectTagSystem
             ObjectTagEvent tagRemoved,
             UnityEvent tagsChanged)
         {
+            if (Initialized)
+                return;
+            
             GameObject = gameObject;
             
             m_name = name;
@@ -47,8 +50,12 @@ namespace LowEndGames.ObjectTagSystem
             {
                 BlockChangesWhile(m_blockTagChangesWhile);
             }
+
+            Initialized = true;
         }
-        
+
+        public bool Initialized { get; private set; }
+
         public GameObject GameObject { get; private set; }
 
         public IEnumerable<ObjectTag> GetActiveTags()
