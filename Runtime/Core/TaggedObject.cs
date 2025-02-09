@@ -24,6 +24,9 @@ namespace LowEndGames.ObjectTagSystem
 
         public void ApplyConfig(TagOwnerConfiguration configuration)
         {
+            if (!didAwake)
+                Awake();
+            
             m_configuration = configuration;
             m_tagOwner.ApplyConfig(configuration);
         }
