@@ -22,7 +22,7 @@ namespace LowEndGames.ObjectTagSystem
             ObjectTagEvent tagRemoved,
             UnityEvent tagsChanged)
         {
-            if (m_initialized)
+            if (Initialized)
                 return;
             
             GameObject = gameObject;
@@ -51,9 +51,11 @@ namespace LowEndGames.ObjectTagSystem
                 BlockChangesWhile(m_blockTagChangesWhile);
             }
 
-            m_initialized = true;
+            Initialized = true;
         }
-        
+
+        public bool Initialized { get; private set; }
+
         public GameObject GameObject { get; private set; }
 
         public IEnumerable<ObjectTag> GetActiveTags()
@@ -347,7 +349,6 @@ namespace LowEndGames.ObjectTagSystem
         
         // -------------------------------------------------- private
 
-        private bool m_initialized;
         private string m_name;
         private TagOwnerConfiguration m_configuration;
         private readonly Dictionary<ObjectTag, TagState> m_tagStates = new(128);
