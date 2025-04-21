@@ -22,7 +22,7 @@ namespace LowEndGames.ObjectTagSystem
 
         public static ObjectTag ToAsset(this Enum tagsEnum)
         {
-            return s_tags.First(t => t.name.Split('.').Last() == tagsEnum.ToString());
+            return s_tags.First(t => t.EnumStringValue == tagsEnum.ToString());
         }
     }
 }
