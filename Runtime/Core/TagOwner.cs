@@ -36,7 +36,7 @@ namespace LowEndGames.ObjectTagSystem
             
             foreach (var tag in ObjectTags.GetAll())
             {
-                m_tagStates.Add(ObjectTag.Create(tag), new TagState(this, tag));
+                m_tagStates.Add(tag, new TagState(this, tag));
             }
 
             foreach (var rule in TagChangeRule.All)

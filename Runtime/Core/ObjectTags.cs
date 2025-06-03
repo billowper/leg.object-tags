@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor;
+using System.Reflection;
+using System.Runtime.CompilerServices;
 using UnityEngine;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
 
 namespace LowEndGames.ObjectTagSystem
 {
-    #if UNITY_EDITOR
-    [InitializeOnLoad]
-    #endif
     public static class ObjectTags
     {
         // ------------------------------------------------- public 
@@ -23,21 +25,28 @@ namespace LowEndGames.ObjectTagSystem
                 }
             }
             
-            var count = m_count;
-
             var tag = ObjectTag.Create(tagName);
 
-            m_count++;
-            m_tags[count] = tag;
+            for (int i = 0; i < m_tags.Length; i++)
+            {
+                if (!m_tags[i].IsValid())
+                {
+                    m_tags[i] = tag;
+                    return tag;
+                }
+            }
 
-            return tag;
+            Debug.LogError($"Hit max tags! ({m_tags.Length})");
+
+            return default;
         }
 
         public static IEnumerable<ObjectTag> GetAll()
         {
-            for (int i = 0; i < m_count; i++)
+            for (int i = 0; i < m_tags.Length; i++)
             {
-                yield return m_tags[i];
+                if (m_tags[i].IsValid())
+                    yield return m_tags[i];
             }
         }
 
@@ -53,22 +62,28 @@ namespace LowEndGames.ObjectTagSystem
         
         // ------------------------------------------------- private
     
-        private static int m_count;
         private static readonly ObjectTag[] m_tags = new ObjectTag[256];
         private static Dictionary<string, ObjectTagSettings> m_tagSettings = new Dictionary<string, ObjectTagSettings>(256);
         
-        static ObjectTags()
-        {
-            m_count = 0;
-            m_tagSettings.Clear();
-        }
-
-        #if UNITY_EDITOR
+#if UNITY_EDITOR
         [InitializeOnLoadMethod]
-        #endif
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+#endif
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
         private static void Init()
         {
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();
+            var tagProviderTypes = assemblies
+                    .SelectMany(a => a.GetTypes()
+                    .Where(t => t.GetCustomAttribute(typeof(ObjectTagsProviderAttribute)) != null))
+                    .ToArray();
+            
+            foreach (var type in tagProviderTypes)
+            {
+                RuntimeHelpers.RunClassConstructor(type.TypeHandle);
+            } 
+            
+            m_tagSettings.Clear();
+            
             var tagSettingsArray = Resources.LoadAll<ObjectTagSettings>("Tags");
 
             foreach (var settings in tagSettingsArray)
@@ -76,7 +91,7 @@ namespace LowEndGames.ObjectTagSystem
                 m_tagSettings.Add(settings.Tag, settings);
             }
 
-            Debug.Log($"ObjectTags: {string.Join(",", m_tags.Select(t => t.ToString()))}");
+            Debug.Log($"ObjectTags: {string.Join("\n", m_tags.Where(t => t.IsValid()).Select(t => t.ToString()))}");
         }
     }
 }

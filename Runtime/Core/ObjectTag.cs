@@ -36,7 +36,7 @@ namespace LowEndGames.ObjectTagSystem
 
         public bool IsValid()
         {
-            return ObjectTags.IsRegisteredTag(m_value);
+            return !string.IsNullOrEmpty(m_value);
         }
 
         public int CompareTo(ObjectTag other)
