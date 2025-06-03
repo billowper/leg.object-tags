@@ -1,9 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
 using UnityEngine;
 
 namespace LowEndGames.ObjectTagSystem
 {
+    #if UNITY_EDITOR
+    [InitializeOnLoad]
+    #endif
     public static class ObjectTags
     {
         // ------------------------------------------------- public 
@@ -51,18 +56,27 @@ namespace LowEndGames.ObjectTagSystem
         private static int m_count;
         private static readonly ObjectTag[] m_tags = new ObjectTag[256];
         private static Dictionary<string, ObjectTagSettings> m_tagSettings = new Dictionary<string, ObjectTagSettings>(256);
+        
+        static ObjectTags()
+        {
+            m_count = 0;
+            m_tagSettings.Clear();
+        }
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        #if UNITY_EDITOR
+        [InitializeOnLoadMethod]
+        #endif
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Init()
         {
-            m_tagSettings.Clear();
-
             var tagSettingsArray = Resources.LoadAll<ObjectTagSettings>("Tags");
 
             foreach (var settings in tagSettingsArray)
             {
                 m_tagSettings.Add(settings.Tag, settings);
             }
+
+            Debug.Log($"ObjectTags: {string.Join(",", m_tags.Select(t => t.ToString()))}");
         }
     }
 }
