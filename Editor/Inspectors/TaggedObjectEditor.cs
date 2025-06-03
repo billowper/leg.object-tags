@@ -20,7 +20,7 @@ namespace LowEndGames.ObjectTagSystem.EditorTools
             if (taggedObject.GetActiveTags().Any())
                 new Label()
                 {
-                    text = "<b>Tags:</b>\n" + string.Join("\n", taggedObject.GetActiveTags().Select(t => $"{t.name.Split('.').Last()} : {taggedObject.GetTagTime(t):F2}"))
+                    text = "<b>Tags:</b>\n" + string.Join("\n", taggedObject.GetActiveTags().Select(t => $"{t} : {taggedObject.GetTagTime(t):F2}"))
                 }.AddTo(root).AddToClassList("info-box");
 
             new PropertyField(serializedObject.FindProperty("m_configuration")).AddTo(root).AddToClassList("box");

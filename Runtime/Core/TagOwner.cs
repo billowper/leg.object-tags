@@ -34,9 +34,9 @@ namespace LowEndGames.ObjectTagSystem
             TagRemoved = tagRemoved;
             TagsChanged = tagsChanged;
             
-            foreach (var tag in ObjectTagsLoader.Tags)
+            foreach (var tag in ObjectTags.GetAll())
             {
-                m_tagStates.Add(tag, new TagState(this, tag));
+                m_tagStates.Add(ObjectTag.Create(tag), new TagState(this, tag));
             }
 
             foreach (var rule in TagChangeRule.All)
@@ -108,7 +108,7 @@ namespace LowEndGames.ObjectTagSystem
         {
             if (!force && m_tagChangesBlocked.IsRequested)
             {
-                Debug.Log($"{m_name}:AddTag - cannot add '{objectTag.name}', global tag changes blocked ({m_tagChangesBlocked.TokenIdentifiers}).");
+                Debug.Log($"{m_name}:AddTag - cannot add '{objectTag}', global tag changes blocked ({m_tagChangesBlocked.TokenIdentifiers}).");
                 return false;
             }
             
@@ -120,18 +120,23 @@ namespace LowEndGames.ObjectTagSystem
             
             if (!force && state.IsBlocked)
             {
-                Debug.Log($"{m_name}:AddTag - cannot add '{objectTag.name}', changes blocked ({state.IsBlockedIdentifiers})");
+                Debug.Log($"{m_name}:AddTag - cannot add '{objectTag}', changes blocked ({state.IsBlockedIdentifiers})");
                 return false;
             }
 
-            if (runFilters && !objectTag.Filters.EvaluateFilters(this))
+            if (!ObjectTags.GetTagSettings(objectTag, out var tagSettings))
+            {
+                return true;
+            }
+
+            if (runFilters && !tagSettings.Filters.EvaluateFilters(this))
             {
                 return false;
             }
 
-            objectTag.ActionsOnAdded.ApplyTo(this, force);
+            tagSettings.ActionsOnAdded.ApplyTo(this, force);
 
-            foreach (var tagBehaviour in objectTag.Behaviours)
+            foreach (var tagBehaviour in tagSettings.Behaviours)
             {
                 AddBehaviour(tagBehaviour);
             }
@@ -141,8 +146,8 @@ namespace LowEndGames.ObjectTagSystem
             TagAdded.Invoke(objectTag);
             TagsChanged.Invoke();
             
-            AddTagsWhile(objectTag.ForcedTagsWhileActive, state.WhileActive);
-            BlockTagsWhile(objectTag.BlockedTagsWhileActive, state.WhileActive);
+            AddTagsWhile(tagSettings.ForcedTagsWhileActive, state.WhileActive);
+            BlockTagsWhile(tagSettings.BlockedTagsWhileActive, state.WhileActive);
             
             foreach (var changeRule in TagChangeRule.All)
             {
@@ -152,7 +157,7 @@ namespace LowEndGames.ObjectTagSystem
                 }
             }
             
-            Debug.Log($"{m_name}:AddTag '{objectTag.name}' added");
+            Debug.Log($"{m_name}:AddTag '{objectTag}' added");
             
             return true;
         }
@@ -167,7 +172,7 @@ namespace LowEndGames.ObjectTagSystem
         {
             if (!force && m_tagChangesBlocked.IsRequested)
             {
-                Debug.Log($"{m_name}:RemoveTag - cannot remove '{objectTag.name}', global tag changes blocked ({m_tagChangesBlocked.TokenIdentifiers}).");
+                Debug.Log($"{m_name}:RemoveTag - cannot remove '{objectTag}', global tag changes blocked ({m_tagChangesBlocked.TokenIdentifiers}).");
                 return false;
             }
             
@@ -180,25 +185,28 @@ namespace LowEndGames.ObjectTagSystem
 
             if (!force && m_tagStates[objectTag].IsForcedOn)
             {
-                Debug.Log($"{m_name}:RemoveTag - cannot remove '{objectTag.name}', ForcedOn = true.");
+                Debug.Log($"{m_name}:RemoveTag - cannot remove '{objectTag}', ForcedOn = true.");
                 return false;
             }
             
             if (state.IsOn)
             {
-                foreach (var tagBehaviour in objectTag.Behaviours)
+                if (ObjectTags.GetTagSettings(objectTag, out var tagSettings))
                 {
-                    RemoveBehaviour(tagBehaviour);
+                    foreach (var tagBehaviour in tagSettings.Behaviours)
+                    {
+                        RemoveBehaviour(tagBehaviour);
+                    }
+                
+                    tagSettings.ActionsOnRemoved.ApplyTo(this, force);
                 }
                 
-                objectTag.ActionsOnRemoved.ApplyTo(this, force);
-
                 TagRemoved.Invoke(objectTag);
                 TagsChanged.Invoke();
 
                 state.SetState(false);
                 
-                Debug.Log($"{m_name}:RemoveTag '{objectTag.name}' removed");
+                Debug.Log($"{m_name}:RemoveTag '{objectTag}' removed");
 
                 foreach (var changeRule in TagChangeRule.All)
                 {
@@ -341,7 +349,7 @@ namespace LowEndGames.ObjectTagSystem
         {
             UnityEditor.Handles.Label(transform.position + Vector3.up, new GUIContent(string.Join("\n", m_tagStates
                 .Where(t => t.Value.IsOn)
-                .Select(t => $"{t.Key.name.Split('.').Last()} - {t.Value.ElapsedTime:F2}"))), new GUIStyle("label") { wordWrap = false, richText = true, stretchWidth = true});
+                .Select(t => $"{t.Key} - {t.Value.ElapsedTime:F2}"))), new GUIStyle("label") { wordWrap = false, richText = true, stretchWidth = true});
         }
 #endif
         
@@ -370,7 +378,7 @@ namespace LowEndGames.ObjectTagSystem
                 m_tag = tag;
                 m_owner = owner;
                 
-                WhileActive = new CancelToken($"{tag.EnumStringValue}");
+                WhileActive = new CancelToken($"{tag}");
 
                 m_addCounter = new TokenCounter();
                 m_addCounter.Released += OnAddCounterReleased;
@@ -411,9 +419,8 @@ namespace LowEndGames.ObjectTagSystem
 
             private readonly ObjectTag m_tag;
             private readonly TagOwner m_owner;
-
-            private TokenCounter m_addCounter;
-            private TokenCounter m_blockedCounter;
+            private readonly TokenCounter m_addCounter;
+            private readonly TokenCounter m_blockedCounter;
             
             private void OnAddCounterReleased()
             {

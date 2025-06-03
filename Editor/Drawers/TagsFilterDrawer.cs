@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using LowEndGames.Utils;
+﻿using LowEndGames.Utils;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine.Pool;
@@ -45,11 +44,8 @@ namespace LowEndGames.ObjectTagSystem.EditorTools
             
             for (int i = 0; i < tagsArrayProp.arraySize; i++)
             {
-                var tag = tagsArrayProp.GetArrayElementAtIndex(i).objectReferenceValue as ObjectTag;
-                if (tag != null)
-                {
-                    tagNames.Add(tag.name.Split('.').Last());
-                }
+                var tagID = tagsArrayProp.GetArrayElementAtIndex(i).FindPropertyRelative("m_value").stringValue;
+                tagNames.Add(tagID);
             }
             
             var result = $"{(invert ? " NOT" : "")} {string.Join($" {separator} ", tagNames)}";

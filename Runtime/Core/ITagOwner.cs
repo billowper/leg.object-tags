@@ -15,6 +15,7 @@ namespace LowEndGames.ObjectTagSystem
         void AddTags(IEnumerable<ObjectTag> tags, bool runFilters = true, bool force = false);
         bool RemoveTag(ObjectTag objectTag, bool force = false);
         void RemoveTags(IEnumerable<ObjectTag> tags, bool force = false);
+        
 
         void AddBehaviour(TagBehaviourSettings tagBehaviourSettings);
         void RemoveBehaviour(TagBehaviourSettings tagBehaviourSettings);

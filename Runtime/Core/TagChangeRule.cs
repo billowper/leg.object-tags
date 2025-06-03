@@ -21,11 +21,9 @@ namespace LowEndGames.ObjectTagSystem
         public List<TagAction> Actions = new();
 
         [Tooltip("reset this rule's timer when this tag is added")]
-        [HideLabel]
         public List<ObjectTag> TimerResetWhenAdded = new List<ObjectTag>();
         
         [Tooltip("reset this rule's timer when this tag is removed")]
-        [HideLabel]
         public List<ObjectTag> TimerResetWhenRemoved = new List<ObjectTag>();
         
         public bool Evaluate(TaggedObject target)
@@ -40,7 +38,7 @@ namespace LowEndGames.ObjectTagSystem
                 var conditionStr = $"If{string.Join(" AND ", Filters.Select(t => t.Title))}{($" for {timeString} seconds")}";
                 var actionsStr = "No Actions";
 
-                if (Actions.Count(t => t.Tag) > 0)
+                if (Actions.Count(t => t.Tag.IsValid()) > 0)
                 {
                     actionsStr = "";
 
@@ -49,7 +47,7 @@ namespace LowEndGames.ObjectTagSystem
 
                     if (addActions.Length > 0)
                     {
-                        actionsStr = $"{string.Join(", ", addActions.Where(t => t.Tag != null).Select(t => $"{t.Action} {t.Tag.name.Split(".").Last()}"))}";
+                        actionsStr = $"{string.Join(", ", addActions.Where(t => t.Tag != null).Select(t => $"{t.Action} {t.Tag}"))}";
 
                         if (removeActions.Length > 0)
                             actionsStr += "\n";
@@ -57,7 +55,7 @@ namespace LowEndGames.ObjectTagSystem
 
                     if (removeActions.Length > 0)
                     {
-                        actionsStr += $"{string.Join(", ", removeActions.Where(t => t.Tag != null).Select(t => $"{t.Action} {t.Tag.name.Split(".").Last()}"))}";
+                        actionsStr += $"{string.Join(", ", removeActions.Where(t => t.Tag.IsValid()).Select(t => $"{t.Action} {t.Tag}"))}";
                     }
                 }
 

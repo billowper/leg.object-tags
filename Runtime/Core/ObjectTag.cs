@@ -1,57 +1,47 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
+﻿using System;
 using UnityEngine;
 
 namespace LowEndGames.ObjectTagSystem
 {
-    /// <summary>
-    /// defines a Tag, will have a corresponding enum value generated
-    /// </summary>
-    [CreateAssetMenu(menuName = "ObjectTags System/Tag")]
-    public class ObjectTag : ScriptableObject
+    [Serializable]
+    public struct ObjectTag : IEquatable<ObjectTag>, IComparable<ObjectTag>
     {
-        [Tooltip("objects must pass this filter for this tag to be added")]
-        public List<TagsFilter> Filters = new();
-        
-        [Tooltip("tag actions performed on the owner when this tag is added")]
-        public List<TagAction> ActionsOnAdded = new(); 
-        
-        [Tooltip("tag actions performed on the owner when this tag is removed")]
-        public List<TagAction> ActionsOnRemoved = new();
+        [SerializeField] private string m_value;
 
-        [Tooltip("tags forced on while this tag is active")]
-        public List<ObjectTag> ForcedTagsWhileActive = new();
-        
-        [Tooltip("tags blocked from being added while this tag is active")]
-        public List<ObjectTag> BlockedTagsWhileActive = new();
-
-        [Tooltip("behaviours which are active when this tag is on an object")]
-        public List<TagBehaviourSettings> Behaviours = new();
-
-        public string EnumStringValue;
-
-        public string GetEnumValueName()
+        private ObjectTag(string value)
         {
-            var trimmed = name.Replace(" ", "").Split('.').Last(); // only take last string, to support asset names like Tag.Whatever
-            
-            var result = Regex.Replace(trimmed, @"[^A-Za-z0-9]+", "")
-                .Replace(".", "")
-                .Replace("-", "")
-                .Replace("(", "")
-                .Replace(")", "");
-            
-            #if UNITY_EDITOR
+            m_value = value;
+        }
+        
+        public static implicit operator string(ObjectTag tag) => tag.m_value;
+        
+        public static ObjectTag Create(string tag) => new ObjectTag(tag);
 
-            if (EnumStringValue != result)
-            {
-                EnumStringValue = result;
-                UnityEditor.EditorUtility.SetDirty(this);
-            }
-            
-            #endif
+        public override string ToString() => m_value;
 
-            return result;
+        public bool Equals(ObjectTag other)
+        {
+            return m_value == other.m_value;
+        }
+
+        public override bool Equals(object obj)
+        {
+            return obj is ObjectTag other && Equals(other);
+        }
+
+        public override int GetHashCode()
+        {
+            return m_value.GetHashCode();
+        }
+
+        public bool IsValid()
+        {
+            return ObjectTags.IsRegisteredTag(m_value);
+        }
+
+        public int CompareTo(ObjectTag other)
+        {
+            return string.Compare(m_value, other.m_value, StringComparison.Ordinal);
         }
     }
 }
