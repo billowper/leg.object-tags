@@ -2,7 +2,7 @@
 
 namespace LowEndGames.ObjectTagSystem
 {
-    [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Class, Inherited = false)]
     public class ObjectTagsProviderAttribute : Attribute
     {
         
