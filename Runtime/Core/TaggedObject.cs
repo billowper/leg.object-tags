@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -75,6 +76,12 @@ namespace LowEndGames.ObjectTagSystem
         }
 
 #if UNITY_EDITOR
+
+        private void OnValidate()
+        {
+            m_configuration.OnValidate(this);
+        }
+
         private void OnDrawGizmos()
         {
             if (m_tagOwner != null)
