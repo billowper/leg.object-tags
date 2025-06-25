@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 
@@ -55,6 +54,7 @@ namespace LowEndGames.ObjectTagSystem
         public void ClearAll() => m_tagOwner.ClearAll();
         
         public float GetTagTime(ObjectTag objectTag) => m_tagOwner.GetTagTime(objectTag);
+        public TagOwner.TagState GetTagState(ObjectTag objectTag) => m_tagOwner.GetTagState(objectTag);
 
         // -------------------------------------------------- private
         

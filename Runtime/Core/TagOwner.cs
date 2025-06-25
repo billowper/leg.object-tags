@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
@@ -307,6 +308,11 @@ namespace LowEndGames.ObjectTagSystem
         {
             return m_tagStates[objectTag].ElapsedTime;
         }
+        
+        public TagState GetTagState(ObjectTag objectTag)
+        {
+            return m_tagStates[objectTag];
+        }
 
         /// <summary>
         /// Updates rule timers and applies <see cref="TagChangeRule.Actions"/> when conditions are met.
@@ -367,7 +373,7 @@ namespace LowEndGames.ObjectTagSystem
         private readonly CancelToken m_blockTagChangesWhile = new CancelToken(CancelToken.InitStates.Reset);
         private readonly TokenCounter m_tagChangesBlocked = new TokenCounter();
 
-        private class TagState
+        public class TagState
         {
             public bool IsOn { get; private set; }
             public bool IsBlocked => m_blockedCounter.IsRequested;
@@ -418,6 +424,11 @@ namespace LowEndGames.ObjectTagSystem
                 {
                     m_owner.RemoveTag(m_tag);
                 }
+            }
+
+            public override string ToString()
+            {
+                return $"{ElapsedTime:F2} {(IsForcedOn ? "| Forced" : "")} ";
             }
 
             private readonly ObjectTag m_tag;

@@ -27,5 +27,6 @@ namespace LowEndGames.ObjectTagSystem
         void ClearAll();
 
         float GetTagTime(ObjectTag objectTag);
+        TagOwner.TagState GetTagState(ObjectTag objectTag);
     }
 }
