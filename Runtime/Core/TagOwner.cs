@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.Assertions;
 using UnityEngine.Events;
 
 namespace LowEndGames.ObjectTagSystem
@@ -96,7 +97,12 @@ namespace LowEndGames.ObjectTagSystem
             }   
         }
 
-        public bool HasTag(ObjectTag objectTag) => m_tagStates[objectTag].IsOn;
+        public bool HasTag(ObjectTag objectTag)
+        {
+            Assert.IsTrue(objectTag.IsValid(), "Invalid ObjectTag!");
+            
+            return m_tagStates[objectTag].IsOn;
+        }
 
         /// <summary>
         /// Attempts to add a tag to the TagOwner, applying <see cref="ObjectTag.ActionsOnAdded"/>
@@ -107,6 +113,8 @@ namespace LowEndGames.ObjectTagSystem
         /// <param name="force">if true, ignore anything that would prevent the tag being added</param>
         public bool AddTag(ObjectTag objectTag, bool runFilters = true, bool force = false)
         {
+            Assert.IsTrue(objectTag.IsValid(), "Invalid ObjectTag!");
+            
             if (!force && m_tagChangesBlocked.IsRequested)
             {
                 Debug.Log($"{m_name}:AddTag - cannot add '{objectTag}', global tag changes blocked ({m_tagChangesBlocked.TokenIdentifiers}).");
@@ -174,6 +182,8 @@ namespace LowEndGames.ObjectTagSystem
         /// <param name="force">if true, ignore anything that would prevent the tag being removed</param>
         public bool RemoveTag(ObjectTag objectTag, bool force = false)
         {
+            Assert.IsTrue(objectTag.IsValid(), "Invalid ObjectTag!");
+            
             if (!force && m_tagChangesBlocked.IsRequested)
             {
                 Debug.Log($"{m_name}:RemoveTag - cannot remove '{objectTag}', global tag changes blocked ({m_tagChangesBlocked.TokenIdentifiers}).");
