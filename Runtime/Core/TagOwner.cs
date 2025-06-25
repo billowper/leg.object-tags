@@ -124,31 +124,34 @@ namespace LowEndGames.ObjectTagSystem
                 return false;
             }
 
-            if (!ObjectTags.GetTagSettings(objectTag, out var tagSettings))
-            {
-                return true;
-            }
+            ObjectTags.GetTagSettings(objectTag, out var tagSettings);
 
-            if (runFilters && !tagSettings.Filters.EvaluateFilters(this))
+            if (runFilters && tagSettings && !tagSettings.Filters.EvaluateFilters(this))
             {
                 return false;
             }
 
-            tagSettings.ActionsOnAdded.ApplyTo(this, force);
-
-            foreach (var tagBehaviour in tagSettings.Behaviours)
+            if (tagSettings)
             {
-                AddBehaviour(tagBehaviour);
+                tagSettings.ActionsOnAdded.ApplyTo(this, force);
+
+                foreach (var tagBehaviour in tagSettings.Behaviours)
+                {
+                    AddBehaviour(tagBehaviour);
+                }
             }
             
             state.SetState(true);
-            
+
             TagAdded.Invoke(objectTag);
             TagsChanged.Invoke();
-            
-            AddTagsWhile(tagSettings.ForcedTagsWhileActive, state.WhileActive);
-            BlockTagsWhile(tagSettings.BlockedTagsWhileActive, state.WhileActive);
-            
+
+            if (tagSettings)
+            {
+                AddTagsWhile(tagSettings.ForcedTagsWhileActive, state.WhileActive);
+                BlockTagsWhile(tagSettings.BlockedTagsWhileActive, state.WhileActive);
+            }
+
             foreach (var changeRule in TagChangeRule.All)
             {
                 if (changeRule.TimerResetWhenAdded.Contains(objectTag))
@@ -358,7 +361,7 @@ namespace LowEndGames.ObjectTagSystem
         private bool m_initialized;
         private string m_name;
         private TagOwnerConfiguration m_configuration;
-        private readonly Dictionary<ObjectTag, TagState> m_tagStates = new(128);
+        private readonly Dictionary<ObjectTag, TagState> m_tagStates = new(128, ObjectTag.ValueComparer);
         private readonly Dictionary<TagChangeRule, float> m_ruleTimers = new(128);
         private readonly List<ITagBehaviour> m_behaviours = new();
         private readonly CancelToken m_blockTagChangesWhile = new CancelToken(CancelToken.InitStates.Reset);

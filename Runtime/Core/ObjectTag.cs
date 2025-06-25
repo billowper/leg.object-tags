@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace LowEndGames.ObjectTagSystem
@@ -6,6 +7,21 @@ namespace LowEndGames.ObjectTagSystem
     [Serializable]
     public struct ObjectTag : IEquatable<ObjectTag>, IComparable<ObjectTag>
     {
+        private sealed class ValueEqualityComparer : IEqualityComparer<ObjectTag>
+        {
+            public bool Equals(ObjectTag x, ObjectTag y)
+            {
+                return x.m_value == y.m_value;
+            }
+
+            public int GetHashCode(ObjectTag obj)
+            {
+                return (obj.m_value != null ? obj.m_value.GetHashCode() : 0);
+            }
+        }
+
+        public static IEqualityComparer<ObjectTag> ValueComparer { get; } = new ValueEqualityComparer();
+
         [SerializeField] private string m_value;
 
         private ObjectTag(string value)
